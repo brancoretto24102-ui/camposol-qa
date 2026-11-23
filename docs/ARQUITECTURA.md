@@ -48,4 +48,4 @@ Fuentes oficiales consultadas: https://supabase.com/pricing ; https://appwrite.i
 
 ## Límites de verificación
 
-La red del ejecutor impide descargar dependencias npm. Las pruebas locales de servidor y seguridad se ejecutan con Node sin dependencias. La compilación React/TypeScript y la inspección visual solo se podrán declarar verificadas cuando la instalación y el build se ejecuten con éxito. No hay integración Microsoft validada sin credenciales Entra. La plantilla E819 no se exporta ni modifica en esta fase.
+La red del ejecutor impide descargar dependencias npm. Las pruebas locales de servidor y seguridad se ejecutan con Node sin dependencias. La instalación, TypeScript, Vite y la auditoría se verificaron correctamente en GitHub Actions, con cero vulnerabilidades informadas. La inspección visual y el primer acceso remoto real siguen pendientes. No hay integración Microsoft validada sin credenciales Entra. La plantilla E819 no se exporta ni modifica en esta fase.

@@ -4,7 +4,7 @@ Desarrollo de la Fase 1 del PROMPT MAESTRO V2.0. La IA, el motor DigiProy, las e
 
 Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . El flujo `Verificar Fase 1` comprueba las pruebas, TypeScript, el build y las dependencias en GitHub. Conserva los resultados y la compilación durante un día; no publica una web ni ejecuta operaciones sobre la base de datos.
 
-**Estado:** backend local probado y backend Supabase independiente configurado con permisos comprobados. Interfaz React/TypeScript escrita y con sintaxis revisada. La instalación de dependencias, el chequeo de tipos, el build y las pruebas de navegador están pendientes porque el entorno de desarrollo bloquea la descarga de paquetes y no tiene esas dependencias en caché. No considerar validada toda la Fase 1 hasta completar esos controles.
+**Estado:** backend local probado y backend Supabase independiente configurado con permisos comprobados. GitHub Actions completó la instalación, TypeScript, la compilación Vite, las 24 pruebas y una auditoría con cero vulnerabilidades. Resultado: https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45219053965 . La revisión visual, el primer acceso remoto real y la recepción de correos siguen pendientes. No considerar cerrada toda la Fase 1 hasta completar esos controles.
 
 ## Ejecutar
 
@@ -33,7 +33,9 @@ node --test tests/*.test.mjs
 npm run build
 ```
 
-Las pruebas del backend no requieren paquetes externos. El build sí requiere instalar las dependencias. `npm install` generará `package-lock.json`; revisarlo y versionarlo antes del primer despliegue. Las versiones directas están fijadas en `package.json`; aún no se ha validado el árbol completo de dependencias ni su auditoría. No afirmar que el build pasó hasta ejecutarlo.
+Las pruebas del backend no requieren paquetes externos. El build sí requiere instalar las dependencias. El primer flujo de GitHub generó y auditó `package-lock.json`, disponible en el archivo privado de resultados de esa ejecución. Falta recuperarlo y versionarlo en el código fuente; las versiones directas están fijadas en `package.json`. La compilación verificada corresponde al commit `717554571c703d9390d349b111d18ada27d8c7c2`.
+
+El paquete `camposol-qa-verificacion` contiene `dist/`, `package-lock.json` y los informes de pruebas, auditoría y huellas SHA-256. Se descarga desde la ejecución anterior, con la sesión del propietario del repositorio. Su retención está limitada a un día. Copiando `dist/` a este directorio se puede revisar la aplicación mediante el servidor local sin instalar dependencias del frontend. El flujo mantiene `contents: read`; no modifica ramas ni publica código en registros de ejecución.
 
 Después del build, `node server/index.mjs` también sirve `dist/` para probar la interfaz local completa. No utilizar ese servidor en producción. Para cambiar `QA_PORT` deben ajustarse también los orígenes permitidos y el proxy local; los valores predeterminados ya coinciden.
 
@@ -102,9 +104,9 @@ La recuperación local deposita el enlace en `.data/outbox/` para desarrollo. Es
 
 ## Pendiente para cerrar la Fase 1
 
-- Instalar dependencias, registrar el lockfile, ejecutar TypeScript/Vite y corregir cualquier error observado.
+- Recuperar y registrar el lockfile ya generado y comprobado por GitHub.
 - Verificar la interfaz en navegador, móvil y escritorio.
-- Comprobar que la sincronización del código y el flujo de verificación del repositorio privado finalicen correctamente.
+- Mantener la sincronización del código con el repositorio privado. La primera subida y su flujo de verificación finalizaron correctamente.
 - Activar el primer administrador remoto y probar acceso/cierre/recuperación contra Auth real.
 - Configurar Microsoft cuando existan los permisos y credenciales necesarios.
 
