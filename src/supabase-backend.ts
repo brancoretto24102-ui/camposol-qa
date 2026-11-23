@@ -1,7 +1,23 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Backend, BackendInfo, AccountInput } from './backend.ts';
 import type { Application, AuditEvent, Member, Profile, Project, ProjectInput, Role } from './domain.ts';
-function check(error:{message:string;code?:string}|null){if(error){if(error.code==='PGRST116')throw new Error('El registro no está disponible o cambió su versión. Recarga los datos.');if(error.code==='42501')throw new Error('No tienes permiso para esta operación.');throw new Error(error.message);}}
+const authMessages:Record<string,string>={
+  invalid_credentials:'Correo o contraseña incorrectos.',
+  email_not_confirmed:'Confirma tu correo antes de iniciar sesión.',
+  email_address_not_authorized:'El servicio de correo no permite enviar a esta dirección. Contacta al administrador.',
+  over_email_send_rate_limit:'Se alcanzó el límite temporal de correos. Espera antes de solicitar otro. Si ya recibiste el enlace, confirma tu cuenta y vuelve al inicio de sesión.',
+  over_request_rate_limit:'Se alcanzó el límite temporal de solicitudes. Espera un momento y vuelve a intentarlo.',
+  weak_password:'La contraseña no cumple los requisitos de seguridad. Revisa las indicaciones del formulario.',
+};
+function check(error:{message:string;code?:string}|null){
+  if(!error)return;
+  const wait=error.message.match(/^For security purposes, you can only request this after (\d+) seconds?\.?$/i)?.[1];
+  if(wait)throw new Error(`Espera ${wait} segundos antes de volver a intentarlo. Si ya recibiste el correo, confirma tu cuenta y vuelve al inicio de sesión.`);
+  if(error.code&&authMessages[error.code])throw new Error(authMessages[error.code]);
+  if(error.code==='PGRST116')throw new Error('El registro no está disponible o cambió su versión. Recarga los datos.');
+  if(error.code==='42501')throw new Error('No tienes permiso para esta operación.');
+  throw new Error(error.message);
+}
 export class SupabaseBackend implements Backend {
   private client:SupabaseClient;
   private current:Profile|null=null;
@@ -9,7 +25,7 @@ export class SupabaseBackend implements Backend {
   async info():Promise<BackendInfo>{return {mode:'supabase',bootstrap_required:false,microsoft_enabled:import.meta.env.VITE_MICROSOFT_ENABLED==='true',google_enabled:import.meta.env.VITE_GOOGLE_ENABLED==='true'};}
   async session(){const {data:{session}}=await this.client.auth.getSession();if(!session){this.current=null;return null;}const {data:{user},error}=await this.client.auth.getUser();check(error);if(!user){this.current=null;return null;}const {data,error:profileError}=await this.client.from('user_profiles').select('*').eq('id',user.id).single();check(profileError);this.current=data as Profile;return this.current;}
   async signIn(email:string,password:string){const {error}=await this.client.auth.signInWithPassword({email,password});check(error);}
-  async signUp(input:AccountInput){const {error}=await this.client.auth.signUp({email:input.email,password:input.password,options:{data:{full_name:input.full_name},emailRedirectTo:window.location.origin+window.location.pathname}});check(error);return 'Revisa el correo para confirmar tu cuenta. Un administrador debe activar tu acceso antes de crear o consultar proyectos.';}
+  async signUp(input:AccountInput){const {error}=await this.client.auth.signUp({email:input.email,password:input.password,options:{data:{full_name:input.full_name},emailRedirectTo:window.location.origin+window.location.pathname}});check(error);return 'Confirma tu correo y después vuelve a esta ventana para iniciar sesión. Un administrador debe activar tu acceso antes de crear o consultar proyectos.';}
   async bootstrap(_input:AccountInput):Promise<void>{throw new Error('El administrador remoto debe ser habilitado desde el backend por su propietario.');}
   async logout(){const {error}=await this.client.auth.signOut();check(error);this.current=null;}
   async oauth(provider:'azure'|'google'){const {error}=await this.client.auth.signInWithOAuth({provider,options:{scopes:provider==='azure'?'email':undefined,redirectTo:window.location.origin+window.location.pathname}});check(error);}

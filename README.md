@@ -4,7 +4,7 @@ Aplicación en desarrollo de la Fase 1 del PROMPT MAESTRO V2.0: acceso, roles, p
 
 Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . Se conserva el backend independiente `camposol-qa-dev`, proyecto Supabase `frhmxbdombsqubqlchkj`; los proyectos anteriores no se modifican.
 
-**Estado comprobado el 23/11/2026:** dependencias instaladas y lockfile versionado; 26 pruebas locales superadas, TypeScript correcto, builds local/Supabase y auditoría con cero vulnerabilidades. React revisado en escritorio y a 390 px con datos ficticios locales. Las cuentas remotas, entrega de correo y OAuth completo siguen pendientes. La Fase 1 está abierta y la Fase 2 no ha comenzado. Ver [verificación](docs/VERIFICACION_FASE_1.md) y [continuación](docs/CONTINUACION_FASE_1.md).
+**Estado comprobado el 23/11/2026:** dependencias instaladas y lockfile versionado; 26 pruebas locales superadas, TypeScript correcto, builds local/Supabase y auditoría con cero vulnerabilidades. React revisado en escritorio y a 390 px con datos ficticios locales. La primera cuenta remota recibió el correo, quedó confirmada y fue activada como administradora con autorización explícita. El inicio de sesión real, la segunda cuenta, recuperación y OAuth completo siguen pendientes. La Fase 1 está abierta y la Fase 2 no ha comenzado. Ver [verificación](docs/VERIFICACION_FASE_1.md) y [continuación](docs/CONTINUACION_FASE_1.md).
 
 La actualización de código `3e03f3dfaefebd60047f8b994a4859a3ad3e7bf3` pasó la [verificación de GitHub](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45240846506).
 
@@ -75,9 +75,13 @@ El build queda en `dist-supabase/` y su vista previa usa http://127.0.0.1:5173 .
 
 En Authentication ya se guardaron Site URL `http://127.0.0.1:5173/` y los retornos exactos `http://127.0.0.1:5173/` y `http://127.0.0.1:5173/#restablecer`. Añadir una URL productiva únicamente cuando se autorice su publicación.
 
-SMTP personalizado de Gmail quedó guardado y habilitado en el proyecto existente. Se recargó el panel y se comprobó que sigue activo con host `smtp.gmail.com`; Supabase muestra que hay una contraseña almacenada y oculta. No se leyó ni se versionó el secreto guardado. Falta comprobar envío y recepción de la confirmación y recuperación con cuentas reales. Mostrar un mensaje en la interfaz no garantiza la entrega; no desactivar la confirmación para evitar ese paso. Las credenciales se administran directamente en Google y Supabase, fuera del código y del chat.
+SMTP personalizado de Gmail quedó guardado y habilitado en el proyecto existente. Se recargó el panel y se comprobó que sigue activo con host `smtp.gmail.com`; Supabase muestra que hay una contraseña almacenada y oculta. No se leyó ni se versionó el secreto guardado. La entrega del correo de confirmación de la cuenta personal quedó comprobada y Auth registra su dirección confirmada. Falta comprobar la recuperación. Mostrar un mensaje en la interfaz no garantiza la entrega; no desactivar la confirmación para evitar ese paso. Las credenciales se administran directamente en Google y Supabase, fuera del código y del chat.
 
 `database/phase1-schema.sql` **ya se aplicó** a este backend. Es una instantánea para una base vacía, no una migración que deba repetirse sobre la base existente.
+
+### Confirmación desde otro dispositivo durante desarrollo
+
+El retorno actual es `http://127.0.0.1:5173/`. En un teléfono esa dirección apunta al propio teléfono, por lo que puede mostrar `ERR_CONNECTION_REFUSED` después de confirmar. Esto no demuestra un fallo de confirmación: se comprobó en Auth que la cuenta personal sí estaba confirmada. Para continuar hay que volver a la ventana de la aplicación en el entorno de desarrollo e iniciar sesión. La URL productiva se configurará cuando se autorice la publicación.
 
 ### Primeros administradores
 
@@ -101,7 +105,7 @@ Microsoft utiliza `signInWithOAuth`, proveedor `azure`, scope `email`. Requiere 
 
 ## Seguridad y límites de verificación
 
-26 pruebas locales y 30 comprobaciones RLS remotas previas superadas. Las pruebas remotas se revirtieron; la consulta de esta continuación confirmó cero cuentas, perfiles y proyectos antes del alta real. Buckets privados y analizador de seguridad sin observaciones. No se repitió el esquema ni el script RLS.
+26 pruebas locales y 30 comprobaciones RLS remotas previas superadas. Las pruebas remotas se revirtieron; antes del alta real había cero cuentas, perfiles y proyectos. La consulta posterior al registro confirmó 1 cuenta Auth, 1 perfil, 1 administrador de aplicación activo y 0 proyectos. Buckets privados y analizador de seguridad sin observaciones. No se repitió el esquema ni el script RLS.
 
 `database/phase1-rls-tests.sql` requiere un backend de desarrollo vacío y acceso administrativo; no ejecutarlo con cuentas o proyectos existentes. Las pruebas locales crean sus propias bases temporales.
 
@@ -124,4 +128,4 @@ La revisión visual utilizó sesiones ficticias sobre una base SQLite independie
 
 ## Pendiente para cerrar la fase
 
-Registro y confirmación de las dos cuentas administradoras ya solicitadas; activación de UUID verificados; pruebas de acceso y permisos reales; configuración y recepción de correo; Microsoft cuando existan credenciales y permisos Entra. La publicación productiva requiere autorización según el prompt y no se ha realizado.
+Inicio de sesión y permisos reales con la primera administradora ya activa; registro, confirmación y activación autorizada de la segunda cuenta; recuperación por correo; Microsoft cuando existan credenciales y permisos Entra. La publicación productiva requiere autorización según el prompt y no se ha realizado.
