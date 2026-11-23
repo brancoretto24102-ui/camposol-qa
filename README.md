@@ -6,6 +6,8 @@ Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . Se con
 
 **Estado comprobado el 23/11/2026:** dependencias instaladas y lockfile versionado; 26 pruebas locales superadas, TypeScript correcto, builds local/Supabase y auditoría con cero vulnerabilidades. React revisado en escritorio y a 390 px con datos ficticios locales. Las cuentas remotas, entrega de correo y OAuth completo siguen pendientes. La Fase 1 está abierta y la Fase 2 no ha comenzado. Ver [verificación](docs/VERIFICACION_FASE_1.md) y [continuación](docs/CONTINUACION_FASE_1.md).
 
+La actualización de código `3e03f3dfaefebd60047f8b994a4859a3ad3e7bf3` pasó la [verificación de GitHub](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45240846506).
+
 ## Desarrollo local
 
 Requisito: Node.js 24 o superior y npm. Desde este directorio, en PowerShell:
@@ -73,7 +75,7 @@ El build queda en `dist-supabase/` y su vista previa usa http://127.0.0.1:5173 .
 
 En Authentication ya se guardaron Site URL `http://127.0.0.1:5173/` y los retornos exactos `http://127.0.0.1:5173/` y `http://127.0.0.1:5173/#restablecer`. Añadir una URL productiva únicamente cuando se autorice su publicación.
 
-SMTP personalizado aún no está configurado. El correo integrado de Supabase solo envía a direcciones del equipo del proyecto, según la [documentación oficial](https://supabase.com/docs/guides/auth/auth-smtp). Falta configurar un servicio autorizado y comprobar confirmación y recuperación. Mostrar un mensaje en la interfaz no garantiza la entrega; no desactivar la confirmación para evitar ese paso.
+El usuario eligió su Gmail personal para SMTP; los datos no secretos se dejaron preparados en el panel y falta introducir la contraseña de aplicación y guardar. Google exige verificación en dos pasos para crear esa contraseña: [instrucciones oficiales](https://support.google.com/accounts/answer/185833?hl=es). No introducirla en el repositorio, archivos locales ni el chat. SMTP personalizado aún no está verificado. El correo integrado de Supabase solo envía a direcciones del equipo del proyecto, según la [documentación oficial](https://supabase.com/docs/guides/auth/auth-smtp). Falta configurar un servicio autorizado y comprobar confirmación y recuperación. Mostrar un mensaje en la interfaz no garantiza la entrega; no desactivar la confirmación para evitar ese paso.
 
 `database/phase1-schema.sql` **ya se aplicó** a este backend. Es una instantánea para una base vacía, no una migración que deba repetirse sobre la base existente.
 
