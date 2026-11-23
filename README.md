@@ -2,9 +2,9 @@
 
 Aplicación en desarrollo de la Fase 1 del PROMPT MAESTRO V2.0: acceso, roles, proyectos, persistencia y auditoría. IA, motor DigiProy, evidencias y exportación Excel corresponden a fases posteriores.
 
-URL pública de la Fase 1: **https://camposol-qa.ingbca-360.chatgpt.site**. Cualquier persona puede abrir el acceso; los proyectos requieren una cuenta confirmada y activada. La cuenta existente se conserva. Detalles de publicación: [Publicación de Fase 1](docs/PUBLICACION_FASE_1.md).
+URL pública de la Fase 1: **https://brancoretto24102-ui.github.io/camposol-qa/**. Cualquier persona puede abrir el acceso; los proyectos requieren una cuenta confirmada y activada. La cuenta existente se conserva. Detalles de publicación: [Publicación de Fase 1](docs/PUBLICACION_FASE_1.md).
 
-Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . Se conserva el backend independiente `camposol-qa-dev`, proyecto Supabase `frhmxbdombsqubqlchkj`; los proyectos anteriores no se modifican.
+Repositorio público por autorización expresa del usuario el 23/11/2026: https://github.com/brancoretto24102-ui/camposol-qa . Se conserva el backend independiente `camposol-qa-dev`, proyecto Supabase `frhmxbdombsqubqlchkj`; los proyectos anteriores no se modifican.
 
 **Estado comprobado el 23/11/2026:** dependencias instaladas y lockfile versionado; 26 pruebas locales superadas, TypeScript correcto, builds local/Supabase y auditoría con cero vulnerabilidades. React revisado en escritorio y a 390 px con datos ficticios locales. La primera cuenta remota recibió el correo, quedó confirmada y fue activada como administradora con autorización explícita. Se comprobó el ingreso real de la administradora, creación y guardado de un proyecto ficticio, persistencia al recargar e historial remoto. La segunda cuenta, recuperación y OAuth completo siguen pendientes. La Fase 1 está abierta y la Fase 2 no ha comenzado. Ver [verificación](docs/VERIFICACION_FASE_1.md) y [continuación](docs/CONTINUACION_FASE_1.md).
 
@@ -42,6 +42,14 @@ Las pruebas del backend no requieren paquetes externos: `node --test tests/*.tes
 
 Las versiones directas y transitivas quedan fijadas mediante `package.json` y `package-lock.json`. El flujo `Verificar Fase 1` instala con `npm ci`, ejecuta las pruebas y el chequeo de tipos, compila y audita. Conserva `dist/`, lockfile e informes durante un día; no despliega ni modifica la base de datos. Sus permisos permanecen en `contents: read`.
 
+## Publicación en GitHub Pages
+
+El flujo `.github/workflows/pages.yml` publica la interfaz desde `main` y permite ejecución manual. Compila con `npm run build:supabase -- --base=/camposol-qa/` y despliega exclusivamente `dist-supabase/`. Los cambios solo en `docs/**` o `README.md` no provocan otra publicación.
+
+La configuración usa las variables de repositorio `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`; contienen la URL y la clave **publicable** del backend existente, nunca claves de servicio. El flujo comprueba el proyecto y exige una clave `sb_publishable_` antes de compilar. El job de publicación usa `pages: write` e `id-token: write`; el acceso al contenido permanece en `contents: read`.
+
+El commit publicado `9d188a0149b50a4bf295d02d1b85b26035936131` pasó la [publicación 45254640994](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45254640994) y la [verificación 45254641095](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45254641095). Se observó la sesión administradora real en esta URL. La publicación anterior de Sites permanece documentada como referencia.
+
 ## Supabase existente
 
 Backend de desarrollo ya creado: `camposol-qa-dev`, proyecto `frhmxbdombsqubqlchkj`, cotización de creación autorizada: USD 0/mes. No crear otro ni reutilizar las bases de los proyectos anteriores.
@@ -75,7 +83,7 @@ npm run preview:supabase
 
 El build queda en `dist-supabase/` y su vista previa usa http://127.0.0.1:5173 . El build local sigue en `dist/`.
 
-El usuario autorizó publicar una URL accesible para cualquier persona el 23/11/2026. Site URL de Auth ahora es `https://camposol-qa.ingbca-360.chatgpt.site/`. Los retornos públicos exactos son la raíz y `https://camposol-qa.ingbca-360.chatgpt.site/#restablecer`. Se conservan los dos retornos locales de desarrollo; no hay comodines.
+El usuario autorizó publicar una URL accesible para cualquier persona el 23/11/2026 y después solicitó usar GitHub Pages con el repositorio público. Site URL de Auth es `https://brancoretto24102-ui.github.io/camposol-qa/`. Se guardaron y verificaron tras recargar seis retornos exactos: raíz y `#restablecer` de GitHub Pages, raíz y `#restablecer` del sitio anterior y los dos retornos locales de desarrollo. No hay comodines. La lista completa está en [Publicación de Fase 1](docs/PUBLICACION_FASE_1.md).
 
 SMTP personalizado de Gmail quedó guardado y habilitado en el proyecto existente. Se recargó el panel y se comprobó que sigue activo con host `smtp.gmail.com`; Supabase muestra que hay una contraseña almacenada y oculta. No se leyó ni se versionó el secreto guardado. La entrega del correo de confirmación de la cuenta personal quedó comprobada y Auth registra su dirección confirmada. Falta comprobar la recuperación. Mostrar un mensaje en la interfaz no garantiza la entrega; no desactivar la confirmación para evitar ese paso. Las credenciales se administran directamente en Google y Supabase, fuera del código y del chat.
 

@@ -5,7 +5,7 @@ Fecha: 23/11/2026. Versión 0.1.0. Continuación del código existente en `main`
 | Componente | Resultado observado en esta continuación |
 | --- | --- |
 | Red local | HTTPS operativo mediante la configuración del entorno. `npm ping` y descargas npm correctos; DNS directo todavía falla. No se modificaron controles de red. |
-| Código privado | Recuperado mediante la conexión GitHub autorizada. Git HTTPS sin credenciales no permite clonar este repositorio privado. |
+| Repositorio | Código recuperado mediante la conexión autorizada cuando era privado. El usuario autorizó hacerlo público para GitHub Pages; se conservan el repositorio y su historial. |
 | Dependencias | Instalación real desde las versiones fijadas y generación de `package-lock.json`; reinstalación limpia con `npm ci` correcta, 33 paquetes instalados. |
 | Lockfile | SHA-256 `9181c2c091356757e825c6e661f5ee88374f912de36af8436b72be815c6a6b07`. No se inventó ni se copió un lockfile de otro proyecto. |
 | Pruebas automatizadas locales | 26 superadas, 0 fallos, 0 omitidas, después de las correcciones. |
@@ -19,10 +19,10 @@ Fecha: 23/11/2026. Versión 0.1.0. Continuación del código existente en `main`
 | Revisión de seguridad Supabase | Sin observaciones en el analizador consultado en esta continuación. |
 | RLS y almacenamiento privado | Se conservan las 30 verificaciones remotas previas, realizadas con transacción revertida. No se repitió el script SQL ni se reaplicó el esquema. |
 | Cuentas administradoras remotas | Primera cuenta personal confirmada y activada con autorización explícita, por su UUID exacto. Segunda cuenta pendiente. Sesión administradora real comprobada, con Administración visible y sin errores. |
-| Retornos de Auth | Site URL `https://camposol-qa.ingbca-360.chatgpt.site/`; 4 retornos exactos: raíz y `#restablecer` del dominio público y los dos locales. Guardado y verificado tras recargar. |
+| Retornos de Auth | Site URL `https://brancoretto24102-ui.github.io/camposol-qa/`; 6 retornos exactos: raíz y `#restablecer` de Pages, los dos de Sites y los dos locales. Guardado y verificado tras recargar. |
 | Correo | SMTP Gmail guardado y activo. El usuario recibió el enlace de confirmación y Auth registra el correo confirmado. Recuperación pendiente. |
 | Microsoft y Google | Preparados y deshabilitados; Microsoft requiere datos y permisos Entra. |
-| Publicación de Fase 1 | Autorizada expresamente por el usuario. https://camposol-qa.ingbca-360.chatgpt.site; versión 1, despliegue correcto. La Fase 2 no se ha iniciado. |
+| Publicación de Fase 1 | Principal: https://brancoretto24102-ui.github.io/camposol-qa/, GitHub Pages y HTTPS, despliegue correcto del commit `9d188a0149b50a4bf295d02d1b85b26035936131`. Sites versión 1 queda como publicación anterior. Fase 2 no iniciada. |
 
 La verificación de GitHub también terminó correctamente para el commit `4cfaae64d64308820f38539e52de7ac47040c6a9`: [ejecución 45246134440](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45246134440). Instalación con lockfile, pruebas, tipos, build, auditoría e informe: todos correctos.
 
@@ -50,7 +50,17 @@ La captura de móvil usa el mismo build de React y la API SQLite real, con un do
 
 Con la cuenta personal ya confirmada y activada se observó una sesión real, menú Administración y ausencia de errores de carga. Desde esa sesión se creó el proyecto `QA-F1-URL-001` («Prueba técnica de Fase 1 — datos ficticios»), se guardó como archivado, se recargó y se observó su versión 2 y los eventos de creación y actualización. SQL de solo lectura confirmó 1 cuenta, 1 perfil, 1 administrador activo y el proyecto técnico archivado en versión 2. No se ejecutó el script RLS reservado para una base vacía.
 
-La versión pública usa el mismo código compilado verificado. Se revisó su pantalla de acceso sin barrera de ChatGPT y los formularios de registro y recuperación. Esta observación no sustituye un inicio de sesión ni una recuperación completos en el dominio público. El paquete contiene solamente los 4 activos de la interfaz y su manifiesto; no incluye documentos, cuentas, SQLite, SMTP ni claves de servicio. El acceso a datos continúa sujeto a Supabase Auth y RLS.
+La publicación inicial de Sites usó el código compilado verificado. Allí se revisaron la pantalla de acceso sin barrera de ChatGPT y los formularios de registro y recuperación. Esta observación no sustituye un inicio de sesión ni una recuperación completos en el dominio público. El paquete contiene solamente los 4 activos de la interfaz y su manifiesto; no incluye documentos, cuentas, SQLite, SMTP ni claves de servicio. El acceso a datos continúa sujeto a Supabase Auth y RLS.
+
+## Publicación en GitHub Pages
+
+El usuario autorizó hacer público el repositorio original. Antes del cambio se revisaron 11 commits y 68 blobs del historial, sin coincidencias de credenciales ni correos personales en la revisión realizada. Se conservan los controles de Auth y RLS y el backend original.
+
+Se repitieron las 26 pruebas locales, TypeScript y el build Supabase con `--base=/camposol-qa/`; las rutas de los activos apuntan al subdirectorio correcto. La auditoría npm informó cero vulnerabilidades. El flujo de Pages instala con el lockfile, valida las variables publicables, ejecuta pruebas y auditoría, compila y publica solo `dist-supabase/`.
+
+El commit `9d188a0149b50a4bf295d02d1b85b26035936131` pasó la [publicación 45254640994](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45254640994) y la [verificación 45254641095](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45254641095). GitHub muestra el sitio activo con fuente GitHub Actions y HTTPS obligatorio.
+
+Se observó la sesión real de la cuenta existente en la nueva URL, ruta `#inicio`, con Administración y Cerrar sesión disponibles. Site URL de Supabase se cambió a Pages; después de recargar persistieron el valor y los seis retornos exactos. No se volvió a registrar la cuenta, no se modificaron roles ni se ejecutó SQL para esta publicación. Esta comprobación no completa el cierre, la recuperación ni los permisos entre dos cuentas.
 
 ## Correcciones incluidas
 

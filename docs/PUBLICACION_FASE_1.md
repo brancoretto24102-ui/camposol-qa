@@ -1,12 +1,61 @@
 # Publicación de Camposol QA — Fase 1
 
-El 23/11/2026 el usuario solicitó una URL que cualquier persona pudiera utilizar. Esta petición autorizó publicar la interfaz actual de Fase 1. La Fase 2 no se ha iniciado.
+El 23/11/2026 el usuario solicitó una URL accesible para cualquier persona y después autorizó hacer público el repositorio existente para utilizar GitHub Pages. La Fase 1 sigue abierta y la Fase 2 no ha comenzado.
 
-URL publicada: **https://camposol-qa.ingbca-360.chatgpt.site**
+URL principal publicada: **https://brancoretto24102-ui.github.io/camposol-qa/**
 
-La URL se puede abrir sin una cuenta de ChatGPT. Los proyectos exigen una cuenta de Camposol QA confirmada y activada. Las nuevas cuentas siguen siendo lectores inactivos hasta su activación; conocer el enlace no concede acceso a datos.
+Cualquier persona puede abrir la web. Los proyectos requieren una cuenta de Camposol QA confirmada y activada; las altas nuevas siguen siendo lectores inactivos. El backend, las cuentas y las reglas de acceso se conservan.
 
-## Identidad de la publicación
+## GitHub Pages
+
+| Dato | Valor |
+| --- | --- |
+| Repositorio original | `brancoretto24102-ui/camposol-qa`, público por autorización del usuario |
+| Fuente de Pages | GitHub Actions |
+| Workflow | `.github/workflows/pages.yml` |
+| Commit publicado | `9d188a0149b50a4bf295d02d1b85b26035936131` |
+| Ejecución de publicación | [45254640994](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45254640994), `completed/success` |
+| Verificación separada | [45254641095](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45254641095), correcta |
+| Compilación | `npm run build:supabase -- --base=/camposol-qa/` |
+| Directorio publicado | `dist-supabase/` |
+| Variables de repositorio | `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` |
+| Backend conservado | Supabase `frhmxbdombsqubqlchkj`, `camposol-qa-dev` |
+| Transporte | HTTPS obligatorio |
+
+Las variables contienen exclusivamente la URL y la clave **publicable** del backend existente. No se usan claves de servicio, SMTP ni credenciales de administradores para compilar. El job valida el proyecto y el prefijo `sb_publishable_`; instala con el lockfile, ejecuta las 26 pruebas, audita y compila antes de publicar. Solo el job de despliegue obtiene `pages: write` e `id-token: write`; se mantiene `contents: read`.
+
+El sitio estático contiene la interfaz compilada y se conecta a Supabase. No ejecuta el servidor SQLite ni publica archivos de entorno o datos de la base. La revisión previa del historial cubrió 11 commits y 68 blobs, sin coincidencias de credenciales ni correos personales en esa revisión.
+
+Se observó la web activa y la sesión real de la cuenta existente en GitHub Pages, con Administración disponible. No fue necesario volver a registrar la cuenta. El cierre de sesión, la recuperación completa y los permisos entre dos cuentas siguen pendientes.
+
+## Retornos de correo
+
+Site URL guardada y verificada tras recargar: `https://brancoretto24102-ui.github.io/camposol-qa/`.
+
+La lista autorizada contiene exactamente:
+
+- `https://brancoretto24102-ui.github.io/camposol-qa/`
+- `https://brancoretto24102-ui.github.io/camposol-qa/#restablecer`
+- `https://camposol-qa.ingbca-360.chatgpt.site/`
+- `https://camposol-qa.ingbca-360.chatgpt.site/#restablecer`
+- `http://127.0.0.1:5173/`
+- `http://127.0.0.1:5173/#restablecer`
+
+Los enlaces solicitados desde Pages usan la ruta del proyecto y el retorno de recuperación correspondiente. La configuración guardada no sustituye la prueba completa de entrega y uso de un enlace de recuperación. SMTP Gmail y confirmación de correo permanecen activos; no leer ni versionar su secreto.
+
+## Actualizar la publicación principal
+
+1. Trabajar en el repositorio original y conservar el backend.
+2. Mantener las dos variables de repositorio con configuración publicable del proyecto autorizado.
+3. Guardar el código verificado en `main`; el workflow de Pages ejecuta las comprobaciones y publica automáticamente. También permite ejecución manual.
+4. Comprobar la conclusión de la ejecución y la web en la URL principal.
+5. Registrar el commit y la ejecución publicados. Los cambios solo en `docs/**` o `README.md` no vuelven a desplegar la aplicación.
+
+No conceder `contents: write`, crear ramas de transporte ni introducir secretos en variables `VITE_`. El desarrollo continúa en Fase 1; este cambio de alojamiento no implementa metodologías, IA, evidencias ni Excel.
+
+## Publicación anterior de Sites — referencia
+
+URL anterior: https://camposol-qa.ingbca-360.chatgpt.site
 
 | Dato | Valor |
 | --- | --- |
@@ -19,43 +68,15 @@ La URL se puede abrir sin una cuenta de ChatGPT. Los proyectos exigen una cuenta
 | Estado observado | `succeeded` |
 | Fuente de la publicación estática | `852202053a6591447acfb77da65eba2b6c793079` |
 | Código React verificado | `4cfaae64d64308820f38539e52de7ac47040c6a9` |
-| Checkout de publicación | `/workspace/sites/camposol-qa` |
+| Directorio usado para la distribución | `/workspace/sites/camposol-qa` |
 | Manifiesto | `.openai/hosting.json`, directorio estático `dist` |
-| Repositorio de desarrollo | `brancoretto24102-ui/camposol-qa`, privado, conservado |
+| Repositorio de desarrollo | `brancoretto24102-ui/camposol-qa`, ahora público, conservado |
 | Backend | Supabase `frhmxbdombsqubqlchkj`, conservado |
 
-El alojamiento contiene una copia de distribución de los activos compilados; no sustituye el repositorio de desarrollo ni crea otra base de datos. No editar el JavaScript minificado para desarrollar funcionalidades.
+Esta distribución anterior se conserva como referencia. El directorio indicado es el usado al publicarla; puede requerir recuperación si se reinicia o limpia el entorno. Si se solicita actualizar Sites, reutilizar su ID exacto y su flujo de publicación; no crear otro Site ni backend. No editar JavaScript minificado para desarrollar funcionalidades.
 
-## Contenido y comprobaciones
-
-Se usó la salida existente de `npm run build:supabase`, compilada con la URL y clave publicable del backend autorizado. Se copiaron únicamente `index.html`, dos archivos JavaScript y CSS. El paquete guardado incluye esos activos y el manifiesto de alojamiento. No contiene archivos de entorno, contraseñas, claves de servicio, SQLite, documentos, cuentas ni datos de proyectos.
-
-Se comprobó el acceso público en navegador, la pantalla de inicio de sesión y los formularios de registro y recuperación. No se introdujeron credenciales en herramientas visibles. Desde una sesión real previa de la administradora se comprobó guardar, archivar y recuperar al recargar un proyecto ficticio, con historial y versión 2.
-
-La vista previa interna se detuvo después de publicar. La URL pública no depende de que esa vista previa esté en ejecución.
-
-## Retornos de correo
-
-Site URL: `https://camposol-qa.ingbca-360.chatgpt.site/`.
-
-La lista autorizada contiene exactamente:
-
-- `https://camposol-qa.ingbca-360.chatgpt.site/`
-- `https://camposol-qa.ingbca-360.chatgpt.site/#restablecer`
-- `http://127.0.0.1:5173/`
-- `http://127.0.0.1:5173/#restablecer`
-
-Se recargó el panel de Supabase y se verificó la persistencia de estos valores. Los enlaces nuevos pedidos desde la URL pública regresan a ella. El enlace personal anterior ya confirmó el correo aunque su antiguo retorno local no abriera en el teléfono.
-
-## Continuar o actualizar
-
-1. Mantener el desarrollo en el repositorio original y conservar el backend.
-2. Compilar en modo Supabase, usando únicamente la clave publicable.
-3. Recuperar y reutilizar el Site anterior y su fuente con el flujo de publicación admitido; no crear otro Site.
-4. Sustituir solo los activos de `dist/` de la distribución con la salida verificada de `dist-supabase/`. Conservar la identidad de `.openai/hosting.json`.
-5. Preparar la fuente, guardar una versión con su paquete correspondiente y publicar esa versión. Mantener la audiencia pública solicitada y los controles de acceso de la aplicación.
-6. Registrar el nuevo ID de versión y despliegue. No guardar credenciales de publicación ni SMTP.
+La publicación anterior usó cuatro activos compilados y el manifiesto de alojamiento. Se comprobó su acceso y, desde una sesión remota previa, el guardado, recarga e historial de un proyecto técnico ficticio archivado en versión 2. La nueva publicación de Pages conserva el mismo backend.
 
 ## Pendiente para cerrar Fase 1
 
-Segunda cuenta, comprobaciones entre roles reales, cierre y recuperación de contraseña en la URL pública. Microsoft permanece preparado y deshabilitado hasta disponer de configuración y permisos de Entra. No declarar completos los módulos de metodologías, IA, evidencias o Excel.
+Segunda cuenta, comprobaciones entre roles reales, cierre y recuperación completa en la URL principal. Microsoft permanece preparado y deshabilitado hasta disponer de configuración y permisos de Entra. No declarar completas las fases posteriores.
