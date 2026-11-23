@@ -1,48 +1,52 @@
 # Continuar Camposol QA — Fase 1
 
-Estado comprobado el 23/11/2026. El usuario autorizó continuar este mismo proyecto en una nueva tarea Work para comprobar si el acceso de red se aplica allí. No reiniciar el desarrollo ni crear otro repositorio o backend.
+Actualizado el 23/11/2026 durante la continuación solicitada. Conservar el repositorio y el backend existentes. No iniciar Fase 2 hasta presentar y validar esta fase.
 
 ## Fuentes y alcance
 
-- Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . El acceso mediante la conexión GitHub funciona y sus permisos son suficientes.
-- Especificación: `Texto pegado(2).txt`, PROMPT MAESTRO V2.0, archivo de Library `libfile_6bba404ac3148191bf0e729d314daf59`. Leer su contenido vigente antes de ampliar el alcance.
-- Trabajar exclusivamente en Fase 1: arquitectura, acceso, roles, proyectos, persistencia y seguridad. La Fase 2 espera la validación y presentación de esta fase. No se ha publicado una web productiva.
-- Backend independiente ya creado: Supabase `frhmxbdombsqubqlchkj`, nombre `camposol-qa-dev`, URL https://frhmxbdombsqubqlchkj.supabase.co . Creación autorizada únicamente con cotización de USD 0/mes. No tocar los proyectos anteriores del usuario.
-- No hay cuentas reales creadas ni contraseñas elegidas por el usuario. Los nuevos registros remotos son lectores inactivos. La activación inicial exige verificar la identidad y el UUID del usuario; no elevar roles por metadatos del navegador.
+- Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . Acceso mediante la conexión GitHub autorizado y operativo. Base de esta continuación: `25b59ca48b65924aadf970b3682a70451a79f2ce`.
+- Especificación vigente leída: `Texto pegado(2).txt`, PROMPT MAESTRO V2.0, Library `libfile_6bba404ac3148191bf0e729d314daf59`.
+- Solo Fase 1: arquitectura, acceso, roles, proyectos, persistencia y seguridad. IA, motor DigiProy, evidencias y Excel esperan fases posteriores.
+- Backend ya creado: Supabase `frhmxbdombsqubqlchkj`, nombre `camposol-qa-dev`, URL https://frhmxbdombsqubqlchkj.supabase.co . Creación previamente autorizada con cotización USD 0/mes. No tocar los proyectos anteriores.
+- Los registros remotos nuevos son lectores inactivos. La activación inicial exige comprobar identidad, confirmación de correo y UUID exacto. No elevar roles desde `user_metadata` ni elegir contraseñas por el usuario.
 
-## Última compilación comprobada
+## Avance comprobado en esta continuación
 
-| Dato | Valor |
-| --- | --- |
-| Código compilado | `8296448ccd59f470670e03731a7364ce7975816a` |
-| Ejecución correcta | https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45227735962 |
-| Pruebas locales y en CI | 26 superadas, 0 fallos |
-| TypeScript y Vite | Correctos; Vite 8.3.8 y Node 24.22.3 |
-| Auditoría npm | 0 vulnerabilidades informadas |
-| Seguridad Supabase | 30 verificaciones previas superadas con transacción revertida |
-| Archivo privado | `camposol-qa-verificacion`, ID `14847160025`, 85191 bytes |
-| SHA-256 del ZIP | `f63a6b74b66be189b33ae4dfe43a39a750a33e65f9481c4da87bac49e3aa0499` |
-| Caducidad del archivo | 24/11/2026, 12:27, hora de Perú |
+1. La red sí permite HTTPS a npm y GitHub a través de la configuración existente; DNS directo todavía falla. `npm ping`, `npm install` y después `npm ci` completaron correctamente. No se modificaron controles de red.
+2. Se recuperó el código privado por la conexión GitHub. El comando Git HTTPS sin autenticación no tiene credenciales; no confundirlo con un bloqueo de npm.
+3. Se generó un lockfile auténtico desde las versiones fijadas y se verificó una instalación limpia: 33 paquetes. `package-lock.json` tiene SHA-256 `9181c2c091356757e825c6e661f5ee88374f912de36af8436b72be815c6a6b07`.
+4. Pasaron 26 pruebas locales, TypeScript y build Vite. Auditoría del lockfile: cero vulnerabilidades.
+5. Se observó React en un navegador: configuración inicial, tablero vacío, creación/edición de un proyecto, versión, persistencia al recargar, miembros, historial, roles y cierre.
+6. Se revisaron acceso, tablero, menú y formulario a 390 × 844 px en un documento del navegador. No se probó un móvil físico.
+7. Se corrigió el acceso al restablecimiento al cambiar el hash en la misma pestaña y el botón de volver; se distinguió el autocompletado de contraseña actual/nueva; se corrigió «con un» en el tablero móvil. Correcciones comprobadas tras recargar.
+8. Se obtuvo la clave **publicable** del backend autorizado, se guardó únicamente en `.env.supabase.local` y se compiló el modo Supabase con salida independiente. No hay claves de servicio ni secretos en el repositorio.
+9. En el panel de Auth se guardó Site URL `http://127.0.0.1:5173/` y dos retornos exactos: la raíz y `http://127.0.0.1:5173/#restablecer`, sin comodines. SMTP personalizado aún no está configurado; el servicio integrado solo envía a direcciones del equipo. Se preguntó al usuario qué servicio SMTP autorizado utilizar. No enviar contraseñas por chat.
+10. Consulta remota: 0 cuentas Auth, 0 perfiles, 0 proyectos antes del alta de usuarios. Analizador de seguridad: sin observaciones. Se conservan las 30 pruebas SQL previas; no se repitieron ni se reaplicó el esquema.
 
-El ZIP contiene `dist/`, `package-lock.json` y los informes. La compilación usa el backend **local**, no Supabase. El código fuente de la interfaz y del backend coincide con el commit indicado; los commits posteriores de documentación pueden omitir CI.
+Los detalles y los límites están en `docs/VERIFICACION_FASE_1.md`.
 
-Se corrigieron dos fallos de recuperación: el enlace del buzón local conserva el origen permitido desde el que se solicitó y la interfaz vuelve a consultar la sesión después de cambiar la contraseña. Las dos pruebas HTTP nuevas cubren los puertos 5173 y 4317, revocación de sesión, enlace de un solo uso y rechazo de orígenes externos.
+## Ejecución local
 
-## Bloqueo del entorno anterior
+- Directorio de esta tarea: `/workspace/scratch/c3faf9c9dfb2/camposol-qa`.
+- `npm ci`, `npm run dev`: interfaz y API SQLite locales, acceso http://127.0.0.1:5173 .
+- `npm run build`, `node server/index.mjs`: build local y API en http://127.0.0.1:4317 .
+- `.env.supabase.example` es el ejemplo sin clave. `.env.supabase.local` contiene la configuración real local y se ignora en Git.
+- `npm run dev:supabase`: Vite conectado al backend existente, sin iniciar SQLite.
+- `npm run build:supabase`: salida `dist-supabase/`.
+- `npm run preview:supabase`: servir esa salida en http://127.0.0.1:5173 . Se abrió la pantalla real de acceso de este build, identificada como «Desarrollo conectado»; no hay sesión remota autenticada todavía.
 
-En la tarea anterior, incluso tras activar la red en Ajustes y reiniciar, los comandos seguían recibiendo `CODEX_SANDBOX_NETWORK_DISABLED=1`; una petición al registro npm falló con `ENOTFOUND`. Las dependencias y `dist/` no están instaladas en el checkout local. La descarga nativa del archivo de GitHub funciona, pero la materialización devuelve una URL temporal, sin ruta local. No se logró transferir sus bytes al equipo.
+Los comandos de terminal de Work pueden ejecutarse en espacios de red separados: un servidor que escucha en un comando no fue accesible desde otro comando ni desde el navegador de escritorio conectado. La revisión fue posible iniciando el servidor local desde la terminal del escritorio del entorno y usando su navegador. No abrir puertos externos ni modificar las restricciones para resolverlo.
 
-Comprobar la red en la nueva tarea antes de prometer una solución. No modificar las restricciones del entorno, el firewall ni los controles de seguridad. No ampliar CI a `contents: write`, crear ramas de transporte ni emitir código o binarios privados en los registros: esas alternativas fueron rechazadas anteriormente. El flujo actual mantiene `contents: read`.
+La revisión usó `.data/phase1-visual-fixtures/`, cuatro cuentas ficticias y sesiones preparadas desde el almacén local. El servidor auxiliar `verification/review-server.mjs` no forma parte del código versionado ni de la publicación. No presentar esas sesiones como acceso remoto real. Para credenciales reales, el usuario debe elegir su contraseña en la interfaz.
 
-Los intentos de consultar la lista de proyectos y localizar las dependencias con la integración de la aplicación devolvieron `Codex app tool request failed`; no se confirmó la creación automática de otra tarea desde la conversación anterior.
+## Pendientes
 
-## Trabajo pendiente
+1. Configurar el SMTP autorizado que elija el usuario y comprobar confirmación y recuperación. Las URL locales ya se guardaron; falta probar el retorno completo. No desactivar confirmación ni invitar a las cuentas al equipo de infraestructura para eludir la restricción del correo integrado.
+2. Registrar y confirmar las dos cuentas administradoras ya solicitadas. Sus correos se recuperaron del contexto autorizado; no guardarlos en el repositorio. El usuario elige sus contraseñas en la aplicación.
+3. Tras verificar la confirmación y el UUID de cada cuenta, activar únicamente esas identidades y probar acceso, cierre, proyectos y permisos contra Auth real.
+4. Configurar Microsoft cuando se disponga de datos y permisos de Entra. Google sigue deshabilitado.
+5. Mantener actualizados este documento y el informe. Presentar Fase 1 antes de pasar a Fase 2. No publicar producción sin la autorización requerida por el prompt.
 
-1. Obtener el código existente y comprobar el acceso normal a npm. Si está permitido, instalar las dependencias fijadas. Si se recupera el ZIP por el canal admitido, verificar tamaño y SHA-256, incorporar `dist/` y registrar el lockfile generado. No inventar un lockfile ni cambiar de framework.
-2. Abrir la interfaz real con el servidor local, datos ficticios y un directorio de prueba independiente. Revisar acceso inicial, proyectos, miembros, roles, historial, cierre y recuperación en escritorio y móvil. No dar por hecha esta revisión: aún no se ha observado React en un navegador.
-3. Para Supabase, obtener su clave publicable mediante la conexión autorizada, configurar el modo correspondiente y recompilar. Nunca incluir claves `service_role` ni otros secretos en variables `VITE_`.
-4. Verificar el registro y confirmación de las dos cuentas administradoras ya solicitadas por el usuario. Él debe elegir sus contraseñas. Después, activar únicamente sus UUID comprobados y probar acceso y permisos reales.
-5. Configurar y comprobar la entrega de recuperación por correo. Microsoft está preparado, pero permanece deshabilitado hasta disponer de la configuración y permisos de Entra. Google también permanece deshabilitado.
-6. Actualizar el informe de verificación y presentar la Fase 1 antes de empezar la siguiente. Mantener explícitos los controles pendientes. La publicación productiva requiere la autorización indicada en la especificación.
+No volver a crear repositorio, proyecto Supabase ni esquema. No ejecutar `database/phase1-rls-tests.sql` sobre una base con cuentas o proyectos. No ampliar CI a `contents: write`, crear ramas de transporte ni emitir código privado en registros. El flujo conserva `contents: read`.
 
-El backend local no necesita paquetes externos para ejecutar `node --test tests/*.test.mjs`. No repetir las pruebas SQL remotas sobre una base con cuentas o proyectos reales.
+El ZIP de la ejecución antigua `45227735962` ya no es necesario para instalar o revisar: ahora hay dependencias y builds locales verificados. No depender de su retención de un día.

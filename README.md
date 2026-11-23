@@ -1,69 +1,87 @@
 # Camposol QA · 0.1.0
 
-Desarrollo de la Fase 1 del PROMPT MAESTRO V2.0. La IA, el motor DigiProy, las evidencias y la exportación Excel pertenecen a las siguientes fases y todavía no están implementados.
+Aplicación en desarrollo de la Fase 1 del PROMPT MAESTRO V2.0: acceso, roles, proyectos, persistencia y auditoría. IA, motor DigiProy, evidencias y exportación Excel corresponden a fases posteriores.
 
-Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . El flujo `Verificar Fase 1` comprueba las pruebas, TypeScript, el build y las dependencias en GitHub. Conserva los resultados y la compilación durante un día; no publica una web ni ejecuta operaciones sobre la base de datos.
+Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . Se conserva el backend independiente `camposol-qa-dev`, proyecto Supabase `frhmxbdombsqubqlchkj`; los proyectos anteriores no se modifican.
 
-**Estado:** backend local probado y backend Supabase independiente configurado con permisos comprobados. GitHub Actions completó la instalación, TypeScript, la compilación Vite, las 26 pruebas y una auditoría con cero vulnerabilidades. Resultado: https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45227735962 . La revisión visual, el primer acceso remoto real y la recepción de correos siguen pendientes. No considerar cerrada toda la Fase 1 hasta completar esos controles. Para retomar el trabajo, consultar `docs/CONTINUACION_FASE_1.md`.
+**Estado comprobado el 23/11/2026:** dependencias instaladas y lockfile versionado; 26 pruebas locales superadas, TypeScript correcto, builds local/Supabase y auditoría con cero vulnerabilidades. React revisado en escritorio y a 390 px con datos ficticios locales. Las cuentas remotas, entrega de correo y OAuth completo siguen pendientes. La Fase 1 está abierta y la Fase 2 no ha comenzado. Ver [verificación](docs/VERIFICACION_FASE_1.md) y [continuación](docs/CONTINUACION_FASE_1.md).
 
-## Ejecutar
+## Desarrollo local
 
-Requisito: Node.js 24 o superior, con npm. Obtenerlo desde https://nodejs.org/ si no está instalado. Abrir una terminal en este directorio.
+Requisito: Node.js 24 o superior y npm. Desde este directorio, en PowerShell:
 
 ```powershell
-npm install
+npm ci
 Copy-Item .env.example .env.local
 npm run dev
 ```
 
-Acceder a http://127.0.0.1:5173 . El modo local es el predeterminado. En el primer acceso se configura un administrador con nombre, correo ficticio y contraseña elegidos por el usuario. No existen cuentas ni contraseñas predefinidas. Desde Administración se crean las cuentas locales de prueba y se asignan permisos. No usar datos empresariales reales.
+Acceder a http://127.0.0.1:5173 . El primer administrador se configura una sola vez con datos ficticios y contraseña elegida por la persona que ejecuta la app. No existen cuentas ni contraseñas predefinidas. Desde Administración se crean las otras cuentas locales y se asignan sus roles.
 
-El backend utiliza SQLite en `.data/` y escucha solo en loopback. Vite sirve la interfaz y redirige `/api` a http://127.0.0.1:4317 . Para ejecutar únicamente la API, sin instalar dependencias:
+La API SQLite se guarda en `.data/`, escucha solo en loopback, en el puerto 4317, y Vite redirige `/api` a ella. No usar datos empresariales reales. Para ejecutar únicamente el backend, sin instalar paquetes:
 
 ```powershell
 node server/index.mjs
 ```
 
-La ruta `/api/health` verifica que el servidor está listo. Sin un build previo la raíz muestra instrucciones de preparación, no una simulación de la interfaz.
+`/api/health` verifica su estado. Sin un build previo, la raíz muestra instrucciones de preparación.
 
-## Verificar y compilar
+## Pruebas y compilación
 
 ```powershell
-node --test tests/*.test.mjs
+npm test
 npm run build
+npm audit --audit-level=high
 ```
 
-Las pruebas del backend no requieren paquetes externos. El build sí requiere instalar las dependencias. El flujo de GitHub generó y auditó `package-lock.json`, disponible en el archivo privado de resultados de esa ejecución. Falta recuperarlo y versionarlo en el código fuente; las versiones directas están fijadas en `package.json`. La compilación verificada corresponde al commit `8296448ccd59f470670e03731a7364ce7975816a`.
+Las pruebas del backend no requieren paquetes externos: `node --test tests/*.test.mjs`. La compilación sí requiere las dependencias. Después de compilar, `node server/index.mjs` sirve también `dist/`, con la interfaz completa en http://127.0.0.1:4317 . No utilizar ese servidor en producción.
 
-El paquete `camposol-qa-verificacion` contiene `dist/`, `package-lock.json` y los informes de pruebas, auditoría y huellas SHA-256. Se descarga desde la ejecución anterior, con la sesión del propietario del repositorio. Su retención está limitada a un día. Copiando `dist/` a este directorio se puede revisar la aplicación mediante el servidor local sin instalar dependencias del frontend. El flujo mantiene `contents: read`; no modifica ramas ni publica código en registros de ejecución.
+Las versiones directas y transitivas quedan fijadas mediante `package.json` y `package-lock.json`. El flujo `Verificar Fase 1` instala con `npm ci`, ejecuta las pruebas y el chequeo de tipos, compila y audita. Conserva `dist/`, lockfile e informes durante un día; no despliega ni modifica la base de datos. Sus permisos permanecen en `contents: read`.
 
-Después del build, `node server/index.mjs` también sirve `dist/` para probar la interfaz local completa. No utilizar ese servidor en producción. Para cambiar `QA_PORT` deben ajustarse también los orígenes permitidos y el proxy local; los valores predeterminados ya coinciden.
+## Supabase existente
 
-## Conectar Supabase
+Backend de desarrollo ya creado: `camposol-qa-dev`, proyecto `frhmxbdombsqubqlchkj`, cotización de creación autorizada: USD 0/mes. No crear otro ni reutilizar las bases de los proyectos anteriores.
 
-Se creó un backend de desarrollo independiente, **camposol-qa-dev**, proyecto `frhmxbdombsqubqlchkj`, con cotización de creación de USD 0/mes, en la organización elegida por el usuario. Los dos proyectos anteriores no se modificaron.
+```powershell
+Copy-Item .env.supabase.example .env.supabase.local
+```
 
-En `.env.local`:
+Completar **solo la clave publicable del proyecto** en ese archivo local:
 
 ```dotenv
 VITE_BACKEND=supabase
 VITE_SUPABASE_URL=https://frhmxbdombsqubqlchkj.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=OBTENER_LA_CLAVE_PUBLICABLE_DEL_PROYECTO
+VITE_SUPABASE_PUBLISHABLE_KEY=
 VITE_MICROSOFT_ENABLED=false
 VITE_GOOGLE_ENABLED=false
 ```
 
-Usar únicamente la clave publicable. Nunca incluir `service_role`, secretos de Microsoft ni claves de IA en variables `VITE_`.
+No incluir `service_role`, claves secretas, secretos de Microsoft ni claves de IA en variables `VITE_`. `.env.supabase.local` y las salidas compiladas se excluyen de Git. En esta continuación se obtuvo la clave publicable por la conexión autorizada y se verificó la compilación correspondiente.
 
-La estructura y las políticas de `database/phase1-schema.sql` **ya se aplicaron** al proyecto anterior. Ese archivo es una instantánea para preparar otro backend vacío, no una migración que deba repetirse sobre la base preparada.
+```powershell
+npm run dev:supabase
+```
 
-En Authentication, configurar Site URL y la lista de redirecciones para la URL local de pruebas y, posteriormente, la URL publicada autorizada. Configurar el servicio de correo y confirmar recepción: no se ha probado el envío SMTP. La pantalla de recuperación remota no garantiza entrega sin esa configuración.
+Este comando inicia solamente Vite conectado al backend remoto. Para revisar el build, sin iniciar SQLite:
 
-### Primer administrador remoto
+```powershell
+npm run build:supabase
+npm run preview:supabase
+```
 
-1. Registrar y confirmar una cuenta desde la aplicación con el modo Supabase configurado, o crearla por el canal administrativo autorizado de Supabase.
-2. Identificar su UUID exacto en Authentication. No usar un UUID de ejemplo ni asignar administrador basándose en metadatos enviados por el navegador.
-3. El propietario del backend activa **esa cuenta concreta** mediante SQL administrativo:
+El build queda en `dist-supabase/` y su vista previa usa http://127.0.0.1:5173 . El build local sigue en `dist/`.
+
+En Authentication ya se guardaron Site URL `http://127.0.0.1:5173/` y los retornos exactos `http://127.0.0.1:5173/` y `http://127.0.0.1:5173/#restablecer`. Añadir una URL productiva únicamente cuando se autorice su publicación.
+
+SMTP personalizado aún no está configurado. El correo integrado de Supabase solo envía a direcciones del equipo del proyecto, según la [documentación oficial](https://supabase.com/docs/guides/auth/auth-smtp). Falta configurar un servicio autorizado y comprobar confirmación y recuperación. Mostrar un mensaje en la interfaz no garantiza la entrega; no desactivar la confirmación para evitar ese paso.
+
+`database/phase1-schema.sql` **ya se aplicó** a este backend. Es una instantánea para una base vacía, no una migración que deba repetirse sobre la base existente.
+
+### Primeros administradores
+
+1. Cada titular registra su cuenta y elige su contraseña en la aplicación; después confirma el correo.
+2. El propietario del backend verifica identidad, confirmación e UUID exacto en Authentication.
+3. Se habilita solo esa cuenta mediante SQL administrativo, usando su UUID real verificado:
 
 ```sql
 update public.user_profiles
@@ -71,23 +89,23 @@ set role='administrador', active=true
 where id='UUID_REAL_VERIFICADO';
 ```
 
-4. Iniciar sesión. Ese administrador puede activar las otras cuentas y administrar sus roles. Los registros nuevos comienzan como lector inactivo, aunque su correo esté confirmado.
+4. Se comprueba inicio, cierre, acceso a proyectos y permisos reales.
 
-No se ha creado una cuenta real ni elegido una contraseña por el usuario. La base permanece sin perfiles ni proyectos de prueba persistentes.
+Los usuarios nuevos comienzan como lectores inactivos, incluso con correo confirmado. No asignar roles a partir de `user_metadata`. No guardar en el repositorio contraseñas, correos personales de los administradores ni enlaces de recuperación.
 
-### Microsoft
+### Microsoft y Google
 
-El adaptador usa `signInWithOAuth` con el proveedor oficial `azure` y el scope `email`. Se necesita una aplicación Entra, tipo de cuenta (personal/empresarial), tenant cuando corresponda, client ID, secreto y URI de retorno. El secreto se configura en Supabase, nunca en la web. Solo después habilitar `VITE_MICROSOFT_ENABLED=true`. Confirmar los permisos empresariales y verificar las reclamaciones de correo conforme a la documentación oficial. Esta integración está preparada y aún no probada con un tenant real.
+Microsoft utiliza `signInWithOAuth`, proveedor `azure`, scope `email`. Requiere una aplicación Entra, tipo de cuenta personal/empresarial, tenant cuando corresponda, client ID, secreto y URI de retorno. El secreto se configura en Supabase. Solo habilitar `VITE_MICROSOFT_ENABLED=true` tras verificar permisos y configuración. Google sigue preparado y deshabilitado. El acceso con Microsoft no conecta Microsoft Copilot.
 
-Google permanece preparado y deshabilitado. El inicio con Microsoft no conecta Microsoft Copilot.
+## Seguridad y límites de verificación
 
-## Seguridad y pruebas
+26 pruebas locales y 30 comprobaciones RLS remotas previas superadas. Las pruebas remotas se revirtieron; la consulta de esta continuación confirmó cero cuentas, perfiles y proyectos antes del alta real. Buckets privados y analizador de seguridad sin observaciones. No se repitió el esquema ni el script RLS.
 
-26 pruebas automatizadas locales y 30 verificaciones RLS remotas superadas. Los datos de las pruebas remotas se revirtieron con `ROLLBACK`; el proyecto quedó con cero perfiles, proyectos y eventos. Los tres buckets son privados. El analizador de seguridad de Supabase no reportó observaciones al finalizar la revisión.
+`database/phase1-rls-tests.sql` requiere un backend de desarrollo vacío y acceso administrativo; no ejecutarlo con cuentas o proyectos existentes. Las pruebas locales crean sus propias bases temporales.
 
-`database/phase1-rls-tests.sql` requiere un backend de desarrollo **vacío** y credenciales administrativas. No ejecutarlo en producción ni con usuarios/proyectos existentes; incluye una comprobación que lo impide. Las pruebas locales crean sus propias bases temporales.
+La recuperación local escribe en `.data/outbox/`, conserva el origen permitido, usa enlaces de un solo uso e invalida sesiones. Ese buzón no se sirve por HTTP ni se versiona. No envía correo real.
 
-La recuperación local deposita el enlace en `.data/outbox/` para desarrollo y conserva el origen permitido desde el que se solicitó, tanto con Vite como con la interfaz compilada. Ese buzón no se sirve por HTTP ni se incorpora al repositorio o al paquete. No envía correos reales. Un restablecimiento invalida las sesiones locales, actualiza la sesión mostrada por la interfaz y el enlace solo se usa una vez.
+La revisión visual utilizó sesiones ficticias sobre una base SQLite independiente. Permitió observar creación/edición, versiones, miembros, historial, roles, cierre y recuperación local; no constituye una prueba de autenticación remota. La revisión móvil usó un documento de navegador de 390 × 844 px, sin dispositivo físico.
 
 ## Estructura
 
@@ -97,17 +115,11 @@ La recuperación local deposita el enlace en `.data/outbox/` para desarrollo y c
 | `src/domain.ts` | Entidades y validaciones comunes |
 | `src/backend.ts` | Contrato y adaptador HTTP local |
 | `src/supabase-backend.ts` | Adaptador Auth y PostgreSQL |
-| `server/` | API local, autenticación y persistencia SQLite |
+| `server/` | API local, autenticación y SQLite |
 | `database/` | Esquema PostgreSQL y verificaciones RLS |
-| `tests/` | Pruebas locales de permisos, API, persistencia y validación |
+| `tests/` | Permisos, API, persistencia y validaciones |
 | `docs/` | Arquitectura y estado comprobado |
 
-## Pendiente para cerrar la Fase 1
+## Pendiente para cerrar la fase
 
-- Recuperar y registrar el lockfile ya generado y comprobado por GitHub.
-- Verificar la interfaz en navegador, móvil y escritorio.
-- Mantener la sincronización del código con el repositorio privado. La primera subida y su flujo de verificación finalizaron correctamente.
-- Activar el primer administrador remoto y probar acceso/cierre/recuperación contra Auth real.
-- Configurar Microsoft cuando existan los permisos y credenciales necesarios.
-
-El despliegue productivo requiere autorización y corresponde a la fase indicada en el prompt. No se ha realizado. La Fase 2 no se ha iniciado.
+Registro y confirmación de las dos cuentas administradoras ya solicitadas; activación de UUID verificados; pruebas de acceso y permisos reales; configuración y recepción de correo; Microsoft cuando existan credenciales y permisos Entra. La publicación productiva requiere autorización según el prompt y no se ha realizado.

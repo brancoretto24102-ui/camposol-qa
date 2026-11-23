@@ -6,10 +6,13 @@
   "engines": { "node": ">=24.0.0" },
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "dev:supabase": "vite --mode supabase",
     "dev:api": "node --watch server/index.mjs",
     "start": "node server/index.mjs",
     "build": "tsc --noEmit && vite build",
+    "build:supabase": "tsc --noEmit && vite build --mode supabase --outDir dist-supabase",
     "preview": "vite preview --host 127.0.0.1",
+    "preview:supabase": "vite preview --outDir dist-supabase --host 127.0.0.1 --port 5173 --strictPort",
     "test": "node --test tests/*.test.mjs",
     "test:domain": "node --test tests/domain.test.mjs"
   },
