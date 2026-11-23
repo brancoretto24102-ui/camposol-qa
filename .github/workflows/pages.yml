@@ -1,0 +1,75 @@
+name: Publicar Camposol QA en GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: camposol-qa-pages
+  cancel-in-progress: false
+
+jobs:
+  compilar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      VITE_BACKEND: supabase
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_MICROSOFT_ENABLED: 'false'
+      VITE_GOOGLE_ENABLED: 'false'
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Preparar Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Validar configuración pública
+        run: |
+          node --input-type=module - <<'NODE'
+          const { VITE_SUPABASE_URL: url, VITE_SUPABASE_PUBLISHABLE_KEY: key } = process.env;
+          if (url !== 'https://frhmxbdombsqubqlchkj.supabase.co' || !key?.startsWith('sb_publishable_')) {
+            throw new Error('Configura las variables de repositorio con la URL y la clave publicable del backend existente.');
+          }
+          NODE
+      - name: Instalar dependencias fijadas
+        run: npm ci --ignore-scripts --no-fund --no-audit
+      - name: Ejecutar pruebas locales
+        run: npm test
+      - name: Revisar dependencias
+        run: npm audit --audit-level=high
+      - name: Compilar para la ruta pública del proyecto
+        run: npm run build:supabase -- --base=/camposol-qa/
+      - name: Preparar solo los archivos de la web
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: dist-supabase
+
+  publicar:
+    needs: compilar
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Comprobar GitHub Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Publicar la compilación verificada
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
