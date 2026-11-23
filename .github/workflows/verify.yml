@@ -1,0 +1,62 @@
+name: Verificar Fase 1
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verificar-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Preparar Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Resolver dependencias fijadas
+        shell: bash
+        run: |
+          mkdir -p verification
+          if test -f package-lock.json; then
+            npm ci --ignore-scripts --no-fund --no-audit
+          else
+            npm install --ignore-scripts --no-fund --no-audit
+          fi
+      - name: Ejecutar pruebas locales
+        shell: bash
+        run: node --test --test-reporter=tap tests/*.test.mjs | tee verification/tests.tap
+      - name: Comprobar tipos y compilar React
+        shell: bash
+        run: npm run build | tee verification/build.log
+      - name: Revisar vulnerabilidades de dependencias
+        shell: bash
+        run: npm audit --audit-level=high --json > verification/audit.json
+      - name: Registrar resultado y huellas del build
+        run: node scripts/write-ci-report.mjs
+      - name: Conservar compilación e informe
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: camposol-qa-verificacion
+          path: |
+            dist/
+            package-lock.json
+            verification/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 9
