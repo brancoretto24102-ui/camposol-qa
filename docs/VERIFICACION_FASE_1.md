@@ -10,7 +10,7 @@ Fecha: 23/11/2026. Versión del código: 0.1.0.
 | Seguridad remota | 30 verificaciones superadas con transacción revertida |
 | Persistencia de pruebas remotas | 0 perfiles, 0 proyectos y 0 eventos después de revertir |
 | Analizador de seguridad Supabase | Sin observaciones en la revisión final |
-| Backend local | 24 pruebas automatizadas superadas, 0 fallos, 0 omitidas |
+| Backend local | 26 pruebas automatizadas superadas, 0 fallos, 0 omitidas |
 | Sintaxis TypeScript | `node --check` de los módulos: correcto; esto no sustituye el chequeo de tipos |
 | Instalación de dependencias | Completada en GitHub Actions; la descarga desde el ejecutor local sigue restringida |
 | Compilación Vite / TypeScript | Correcta: TypeScript sin errores y Vite 8.3.8, Node 24.22.3 |
@@ -30,6 +30,6 @@ Alta inicial protegida; contraseñas derivadas con scrypt; rechazo de contraseñ
 
 Acceso anónimo denegado; proyectos propios/ajenos; inserción con RETURNING; identidad del creador; autoelevación por columnas y RPC; ignorar roles en user_metadata; restricción de lector; cuentas inactivas; control por ruta de archivo; concurrencia mediante versión; auditoría no falsificable; administración y último administrador; revocación de membresía con sesión vigente; buckets privados.
 
-Verificación de compilación y dependencias: https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45219053965 , código `717554571c703d9390d349b111d18ada27d8c7c2`. El archivo privado de resultados contiene la compilación y los informes; la recuperación local está pendiente por restricciones del entorno. No se ampliaron los permisos de CI ni se exportó código privado en sus registros.
+Verificación de compilación y dependencias: https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45227735962 , código `8296448ccd59f470670e03731a7364ce7975816a`. Incluye la corrección del enlace de recuperación para los dos orígenes locales y la actualización de sesión después del restablecimiento. El archivo privado de resultados contiene la compilación y los informes; la recuperación local está pendiente por restricciones del entorno. No se ampliaron los permisos de CI ni se exportó código privado en sus registros.
 
 Las verificaciones SQL y de compilación no prueban la entrega SMTP, OAuth completo, renderizado React, tamaño de archivos subidos ni descargas con URL firmada. Esas limitaciones permanecen explícitas. Las dos cuentas administradoras solicitadas se habilitarán tras su registro y validación, sin guardar sus contraseñas ni direcciones personales en el repositorio. La Fase 1 aún no está cerrada y no se ha comenzado la Fase 2.

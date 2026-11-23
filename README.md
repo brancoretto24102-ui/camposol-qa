@@ -4,7 +4,7 @@ Desarrollo de la Fase 1 del PROMPT MAESTRO V2.0. La IA, el motor DigiProy, las e
 
 Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . El flujo `Verificar Fase 1` comprueba las pruebas, TypeScript, el build y las dependencias en GitHub. Conserva los resultados y la compilación durante un día; no publica una web ni ejecuta operaciones sobre la base de datos.
 
-**Estado:** backend local probado y backend Supabase independiente configurado con permisos comprobados. GitHub Actions completó la instalación, TypeScript, la compilación Vite, las 24 pruebas y una auditoría con cero vulnerabilidades. Resultado: https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45219053965 . La revisión visual, el primer acceso remoto real y la recepción de correos siguen pendientes. No considerar cerrada toda la Fase 1 hasta completar esos controles.
+**Estado:** backend local probado y backend Supabase independiente configurado con permisos comprobados. GitHub Actions completó la instalación, TypeScript, la compilación Vite, las 26 pruebas y una auditoría con cero vulnerabilidades. Resultado: https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45227735962 . La revisión visual, el primer acceso remoto real y la recepción de correos siguen pendientes. No considerar cerrada toda la Fase 1 hasta completar esos controles. Para retomar el trabajo, consultar `docs/CONTINUACION_FASE_1.md`.
 
 ## Ejecutar
 
@@ -33,7 +33,7 @@ node --test tests/*.test.mjs
 npm run build
 ```
 
-Las pruebas del backend no requieren paquetes externos. El build sí requiere instalar las dependencias. El primer flujo de GitHub generó y auditó `package-lock.json`, disponible en el archivo privado de resultados de esa ejecución. Falta recuperarlo y versionarlo en el código fuente; las versiones directas están fijadas en `package.json`. La compilación verificada corresponde al commit `717554571c703d9390d349b111d18ada27d8c7c2`.
+Las pruebas del backend no requieren paquetes externos. El build sí requiere instalar las dependencias. El flujo de GitHub generó y auditó `package-lock.json`, disponible en el archivo privado de resultados de esa ejecución. Falta recuperarlo y versionarlo en el código fuente; las versiones directas están fijadas en `package.json`. La compilación verificada corresponde al commit `8296448ccd59f470670e03731a7364ce7975816a`.
 
 El paquete `camposol-qa-verificacion` contiene `dist/`, `package-lock.json` y los informes de pruebas, auditoría y huellas SHA-256. Se descarga desde la ejecución anterior, con la sesión del propietario del repositorio. Su retención está limitada a un día. Copiando `dist/` a este directorio se puede revisar la aplicación mediante el servidor local sin instalar dependencias del frontend. El flujo mantiene `contents: read`; no modifica ramas ni publica código en registros de ejecución.
 
@@ -83,11 +83,11 @@ Google permanece preparado y deshabilitado. El inicio con Microsoft no conecta M
 
 ## Seguridad y pruebas
 
-24 pruebas automatizadas locales y 30 verificaciones RLS remotas superadas. Los datos de las pruebas remotas se revirtieron con `ROLLBACK`; el proyecto quedó con cero perfiles, proyectos y eventos. Los tres buckets son privados. El analizador de seguridad de Supabase no reportó observaciones al finalizar la revisión.
+26 pruebas automatizadas locales y 30 verificaciones RLS remotas superadas. Los datos de las pruebas remotas se revirtieron con `ROLLBACK`; el proyecto quedó con cero perfiles, proyectos y eventos. Los tres buckets son privados. El analizador de seguridad de Supabase no reportó observaciones al finalizar la revisión.
 
 `database/phase1-rls-tests.sql` requiere un backend de desarrollo **vacío** y credenciales administrativas. No ejecutarlo en producción ni con usuarios/proyectos existentes; incluye una comprobación que lo impide. Las pruebas locales crean sus propias bases temporales.
 
-La recuperación local deposita el enlace en `.data/outbox/` para desarrollo. Ese buzón no se sirve por HTTP ni se incorpora al repositorio o al paquete. No envía correos reales. Un restablecimiento invalida las sesiones locales y el enlace solo se usa una vez.
+La recuperación local deposita el enlace en `.data/outbox/` para desarrollo y conserva el origen permitido desde el que se solicitó, tanto con Vite como con la interfaz compilada. Ese buzón no se sirve por HTTP ni se incorpora al repositorio o al paquete. No envía correos reales. Un restablecimiento invalida las sesiones locales, actualiza la sesión mostrada por la interfaz y el enlace solo se usa una vez.
 
 ## Estructura
 
