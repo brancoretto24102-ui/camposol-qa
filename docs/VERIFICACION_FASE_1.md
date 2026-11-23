@@ -20,7 +20,7 @@ Fecha: 23/11/2026. Versión 0.1.0. Continuación del código existente en `main`
 | RLS y almacenamiento privado | Se conservan las 30 verificaciones remotas previas, realizadas con transacción revertida. No se repitió el script SQL ni se reaplicó el esquema. |
 | Cuentas administradoras remotas | Pendientes de registro y confirmación por sus titulares; contraseñas elegidas por ellos. |
 | Retornos de Auth | Site URL `http://127.0.0.1:5173/` y dos retornos exactos guardados en el proyecto existente: raíz y `#restablecer`. |
-| Correo | El usuario eligió Gmail personal. Datos de SMTP preparados en el panel; falta que introduzca una contraseña de aplicación y guarde. SMTP aún no se da por activado; recepción pendiente. |
+| Correo | SMTP personalizado de Gmail guardado y habilitado. Comprobado tras recargar: activo, host `smtp.gmail.com` y aviso de contraseña almacenada y oculta. Envío y recepción reales pendientes. |
 | Microsoft y Google | Preparados y deshabilitados; Microsoft requiere datos y permisos Entra. |
 | Publicación productiva | No realizada. La Fase 2 no se ha iniciado. |
 
@@ -65,7 +65,7 @@ Alta inicial protegida; scrypt; contraseña incorrecta; cierre; cookie HttpOnly/
 - Registrar y confirmar las dos cuentas ya solicitadas. Activar exclusivamente sus UUID verificados; no confiar en metadatos del navegador ni asignar administradores por coincidencia parcial de correo.
 - Comprobar inicio, cierre, proyectos y permisos con cuentas remotas reales.
 - Redirecciones locales ya guardadas y comprobadas en el panel: `http://127.0.0.1:5173/` y `http://127.0.0.1:5173/#restablecer`. Falta probar el retorno completo con correo real.
-- El usuario eligió su Gmail personal para SMTP. Se prepararon remitente y usuario en el panel, host `smtp.gmail.com`, puerto 587 y nombre «Camposol QA», sin guardar todavía. Falta que el usuario cree e introduzca su contraseña de aplicación de Google y guarde los ajustes; después hay que comprobar envío y recepción. La verificación en dos pasos es un requisito de Google para crear esa contraseña. No se obtuvo ni se guardó ese secreto. [Configuración oficial de Google](https://support.google.com/accounts/answer/185833?hl=es). No desactivar la confirmación ni añadir administradores de infraestructura como sustituto del envío. La restricción del servicio integrado se contrastó con la [documentación oficial](https://supabase.com/docs/guides/auth/auth-smtp).
+- SMTP de Gmail guardado y comprobado después de recargar. Falta verificar entrega real de los mensajes. El formulario de registro de la cuenta personal está preparado y espera la contraseña elegida directamente por el usuario. No leer ni versionar la contraseña SMTP guardada, ni desactivar la confirmación como sustituto de la prueba.
 - Microsoft exige configuración y permisos de Entra; Google permanece deshabilitado.
 - No se observó en navegador un cambio completo de contraseña con credenciales reales; el backend local sí tiene pruebas automatizadas de ese flujo.
 - Las verificaciones actuales no cubren carga de archivos, URLs firmadas, IA, metodologías completas ni exportación Excel; pertenecen a fases posteriores.
