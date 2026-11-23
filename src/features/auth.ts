@@ -12,7 +12,7 @@ export function Auth({backend,info,onReady,resetRoute}:{backend:Backend;info:Bac
     else if(mode==='login'){await backend.signIn(value(data,'email'),value(data,'password'));await onReady();}
     else if(mode==='register'){setSuccess(await backend.signUp({full_name:value(data,'full_name'),email:value(data,'email'),password:value(data,'password')}));}
     else if(mode==='recover'){setSuccess(await backend.recover(value(data,'email')));}
-    else {const token=resetRoute.split('=')[1]??'';await backend.reset(decodeURIComponent(token),value(data,'password'));go('inicio');setMode('login');setSuccess('Contraseña actualizada. Inicia sesión con tus nuevos datos.');}
+    else {const token=resetRoute.split('=')[1]??'';await backend.reset(decodeURIComponent(token),value(data,'password'));await onReady();setMode('login');setSuccess('Contraseña actualizada. Inicia sesión con tus nuevos datos.');}
   }catch(e){setError(message(e));}finally{setBusy(false);}}
   function switchMode(next:string){setMode(next);setError('');setSuccess('');}
   return h('div',{className:'auth-layout'},h('aside',{className:'auth-story'},h(Brand),h('div',{className:'auth-story-copy'},h('span',{className:'eyebrow'},'CALIDAD QUE SE CONSTRUYE EN EQUIPO'),h('h1',null,'Cada prueba,',h('br'),'bien documentada.'),h('p',null,'Un espacio para organizar tus proyectos, trabajar con claridad y preparar documentación confiable.'),h('div',{className:'auth-points'},h('p',null,h(Icon,{name:'shield'}),' Acceso por roles y proyecto'),h('p',null,h(Icon,{name:'clock'}),' Cambios con historial'),h('p',null,h(Icon,{name:'users'}),' Un equipo, un mismo espacio'))),h('small',{className:'auth-story-footer'},'CAMPOSOL QA · Entorno de desarrollo')),

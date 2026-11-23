@@ -1,11 +1,35 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
+import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { basename, dirname, join, resolve } from 'node:path';
 import { createApp } from '../server/index.mjs';
 import { Store } from '../server/store.mjs';
-async function server(t){const store=new Store();const app=createApp({store});await new Promise(r=>app.listen(0,'127.0.0.1',r));t.after(async()=>{await new Promise(r=>app.close(r));store.close();});const base=`http://127.0.0.1:${app.address().port}`;const request=(path,options={})=>fetch(base+path,options);const boot=await request('/api/bootstrap',{method:'POST',headers:{Origin:'http://127.0.0.1:5173','Content-Type':'application/json'},body:JSON.stringify({full_name:'HTTP Admin',email:'http@example.test',password:randomBytes(24).toString('base64url')})});const cookie=boot.headers.get('set-cookie').split(';')[0];const session=await boot.json();return {store,request,cookie,session,boot};}
+async function server(t,options={}){const store=new Store();const app=createApp({...options,store});await new Promise(r=>app.listen(0,'127.0.0.1',r));t.after(async()=>{await new Promise(r=>app.close(r));store.close();});const base=`http://127.0.0.1:${app.address().port}`;const request=(path,options={})=>fetch(base+path,options);const boot=await request('/api/bootstrap',{method:'POST',headers:{Origin:'http://127.0.0.1:5173','Content-Type':'application/json'},body:JSON.stringify({full_name:'HTTP Admin',email:'http@example.test',password:randomBytes(24).toString('base64url')})});const cookie=boot.headers.get('set-cookie').split(';')[0];const session=await boot.json();return {store,request,cookie,session,boot};}
 test('API sin sesión no devuelve información de proyectos',async t=>{const {request}=await server(t);assert.equal((await request('/api/projects')).status,401);assert.equal((await request('/api/users')).status,401);});
 test('cookie de sesión protegida y token no expuesto en la respuesta JSON',async t=>{const {boot,session}=await server(t);assert.match(boot.headers.get('set-cookie'),/HttpOnly; SameSite=Strict/);assert.equal(session.token,undefined);assert.ok(session.csrf);});
 test('CSRF y origen bloquean mutaciones externas',async t=>{const {request,cookie,session}=await server(t);const payload=JSON.stringify({full_name:'Nombre actualizado'});assert.equal((await request('/api/profile',{method:'PATCH',headers:{Cookie:cookie,Origin:'https://otro.example','Content-Type':'application/json','X-CSRF-Token':session.csrf},body:payload})).status,403);assert.equal((await request('/api/profile',{method:'PATCH',headers:{Cookie:cookie,Origin:'http://127.0.0.1:5173','Content-Type':'application/json'},body:payload})).status,403);const good=await request('/api/profile',{method:'PATCH',headers:{Cookie:cookie,Origin:'http://127.0.0.1:5173','Content-Type':'application/json','X-CSRF-Token':session.csrf},body:payload});assert.equal(good.status,200);assert.equal((await good.json()).full_name,'Nombre actualizado');});
 test('cierre de sesión invalida el token en servidor',async t=>{const {request,cookie,session}=await server(t);assert.equal((await request('/api/logout',{method:'POST',headers:{Cookie:cookie,Origin:'http://127.0.0.1:5173','Content-Type':'application/json','X-CSRF-Token':session.csrf},body:'{}'})).status,200);assert.equal((await request('/api/projects',{headers:{Cookie:cookie}})).status,401);});
 test('límite de intentos de acceso devuelve 429',async t=>{const {request}=await server(t);let response;for(let i=0;i<9;i++)response=await request('/api/login',{method:'POST',headers:{Origin:'http://127.0.0.1:5173','Content-Type':'application/json'},body:JSON.stringify({email:'inexistente@example.test',password:'fallo'})});assert.equal(response.status,429);});
+for(const origin of ['http://127.0.0.1:5173','http://127.0.0.1:4317'])test(`recuperación desde ${origin}: enlace válido y sesión anterior revocada`,async t=>{
+  const dataDir=await mkdtemp(join(tmpdir(),'camposol-qa-http-'));
+  t.after(async()=>{assert.equal(dirname(dataDir),resolve(tmpdir()));assert.match(basename(dataDir),/^camposol-qa-http-/);await rm(dataDir,{recursive:true,force:true});});
+  const {request,cookie}=await server(t,{dataDir});
+  const post=(path,input,requestOrigin=origin)=>request(path,{method:'POST',headers:{Origin:requestOrigin,'Content-Type':'application/json'},body:JSON.stringify(input)});
+  assert.equal((await post('/api/recovery',{email:'http@example.test'},'https://otro.example')).status,403);
+  assert.equal((await post('/api/recovery',{email:'http@example.test'})).status,200);
+  const outbox=join(dataDir,'outbox'),files=await readdir(outbox);
+  assert.equal(files.length,1);
+  const item=JSON.parse(await readFile(join(outbox,files[0]),'utf8')),url=new URL(item.reset_url);
+  assert.equal(url.origin,origin);
+  assert.equal(url.hash,`#restablecer=${item.token}`);
+  const password=randomBytes(24).toString('base64url');
+  assert.equal((await post('/api/reset-password',{token:item.token,password})).status,200);
+  const afterReset=await request('/api/session',{headers:{Cookie:cookie}});
+  assert.equal(afterReset.status,200);
+  assert.equal((await afterReset.json()).user,null);
+  assert.equal((await request('/api/projects',{headers:{Cookie:cookie}})).status,401);
+  assert.equal((await post('/api/reset-password',{token:item.token,password})).status,422);
+  assert.equal((await post('/api/login',{email:'http@example.test',password})).status,200);
+});
