@@ -15,14 +15,14 @@ Fecha: 23/11/2026. Versión 0.1.0. Continuación del código existente en `main`
 | Interfaz escritorio | React observado en Chromium: configuración inicial, tablero vacío, proyecto, miembros, historial y administración. |
 | Interfaz móvil | Acceso, tablero, menú y formulario observados en un viewport de documento de 390 × 844 px; sin desbordamiento horizontal de la página. No se probó un teléfono físico. |
 | Supabase existente | `frhmxbdombsqubqlchkj`, nombre `camposol-qa-dev`, estado ACTIVE_HEALTHY; costo de creación autorizado previamente: USD 0/mes. |
-| Estado remoto de datos | Después del registro: 1 cuenta Auth, 1 perfil, 1 administrador de aplicación activo y 0 proyectos. La base ya no está vacía; no repetir el script RLS de inicialización. |
+| Estado remoto de datos | Después del registro: 1 cuenta Auth, 1 perfil, 1 administrador de aplicación activo y 1 proyecto técnico ficticio, archivado en versión 2. No repetir el script RLS de inicialización. |
 | Revisión de seguridad Supabase | Sin observaciones en el analizador consultado en esta continuación. |
 | RLS y almacenamiento privado | Se conservan las 30 verificaciones remotas previas, realizadas con transacción revertida. No se repitió el script SQL ni se reaplicó el esquema. |
-| Cuentas administradoras remotas | Primera cuenta personal confirmada y activada con autorización explícita, por su UUID exacto. Segunda cuenta pendiente. Inicio de sesión real pendiente. |
-| Retornos de Auth | Site URL `http://127.0.0.1:5173/` y dos retornos exactos guardados en el proyecto existente: raíz y `#restablecer`. |
+| Cuentas administradoras remotas | Primera cuenta personal confirmada y activada con autorización explícita, por su UUID exacto. Segunda cuenta pendiente. Sesión administradora real comprobada, con Administración visible y sin errores. |
+| Retornos de Auth | Site URL `https://camposol-qa.ingbca-360.chatgpt.site/`; 4 retornos exactos: raíz y `#restablecer` del dominio público y los dos locales. Guardado y verificado tras recargar. |
 | Correo | SMTP Gmail guardado y activo. El usuario recibió el enlace de confirmación y Auth registra el correo confirmado. Recuperación pendiente. |
 | Microsoft y Google | Preparados y deshabilitados; Microsoft requiere datos y permisos Entra. |
-| Publicación productiva | No realizada. La Fase 2 no se ha iniciado. |
+| Publicación de Fase 1 | Autorizada expresamente por el usuario. https://camposol-qa.ingbca-360.chatgpt.site; versión 1, despliegue correcto. La Fase 2 no se ha iniciado. |
 
 La verificación de GitHub también terminó correctamente para el commit `4cfaae64d64308820f38539e52de7ac47040c6a9`: [ejecución 45246134440](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45246134440). Instalación con lockfile, pruebas, tipos, build, auditoría e informe: todos correctos.
 
@@ -46,6 +46,12 @@ Se utilizó una base SQLite separada en `.data/phase1-visual-fixtures/`, con cua
 
 La captura de móvil usa el mismo build de React y la API SQLite real, con un documento `srcdoc` del tamaño indicado. No es emulación de un dispositivo ni una maqueta. El servidor y las rutas auxiliares de revisión viven en `verification/`, se excluyen del repositorio y de la aplicación publicada. El servidor normal conserva sus validaciones y su política de contenido.
 
+## Comprobación contra el backend real y publicación
+
+Con la cuenta personal ya confirmada y activada se observó una sesión real, menú Administración y ausencia de errores de carga. Desde esa sesión se creó el proyecto `QA-F1-URL-001` («Prueba técnica de Fase 1 — datos ficticios»), se guardó como archivado, se recargó y se observó su versión 2 y los eventos de creación y actualización. SQL de solo lectura confirmó 1 cuenta, 1 perfil, 1 administrador activo y el proyecto técnico archivado en versión 2. No se ejecutó el script RLS reservado para una base vacía.
+
+La versión pública usa el mismo código compilado verificado. Se revisó su pantalla de acceso sin barrera de ChatGPT y los formularios de registro y recuperación. Esta observación no sustituye un inicio de sesión ni una recuperación completos en el dominio público. El paquete contiene solamente los 4 activos de la interfaz y su manifiesto; no incluye documentos, cuentas, SQLite, SMTP ni claves de servicio. El acceso a datos continúa sujeto a Supabase Auth y RLS.
+
 ## Correcciones incluidas
 
 1. Sincronizar el modo de acceso con los cambios de la ruta de restablecimiento en la misma pestaña; limpiar esa ruta al volver al acceso.
@@ -64,11 +70,11 @@ Alta inicial protegida; scrypt; contraseña incorrecta; cierre; cookie HttpOnly/
 ## Límites y controles pendientes
 
 - Primera cuenta personal ya confirmada y activada con autorización explícita; segunda cuenta pendiente de registro, confirmación y activación autorizada. Usar únicamente UUID verificados, sin confiar en metadatos del navegador ni coincidencias parciales de correo.
-- Comprobar inicio, cierre, proyectos y permisos con cuentas remotas reales.
-- Redirecciones locales guardadas: raíz y `#restablecer` del puerto 5173. El usuario abrió el enlace de confirmación en su celular y llegó a `127.0.0.1`, que allí apunta al teléfono; por eso recibió `ERR_CONNECTION_REFUSED`. Auth sí registró la confirmación. El retorno al navegador del entorno y el acceso real siguen pendientes.
+- Ingreso de la administradora, guardado, persistencia e historial remotos comprobados. Falta cierre y completar permisos entre cuentas reales y recuperación en la URL pública.
+- El primer retorno local falló en el teléfono aunque Auth confirmó el correo. Ya se configuraron y verificaron los retornos HTTPS del sitio publicado. Falta validar un enlace de recuperación completo desde el dominio público.
 - SMTP de Gmail guardado y confirmación personal entregada; falta recuperación. La contraseña de la cuenta ya fue elegida por el usuario y la del SMTP permanece oculta; no leerlas, versionarlas ni pedirlas por chat.
 - Microsoft exige configuración y permisos de Entra; Google permanece deshabilitado.
 - No se observó en navegador un cambio completo de contraseña con credenciales reales; el backend local sí tiene pruebas automatizadas de ese flujo.
 - Las verificaciones actuales no cubren carga de archivos, URLs firmadas, IA, metodologías completas ni exportación Excel; pertenecen a fases posteriores.
 
-La Fase 1 continúa abierta hasta completar estos controles. No se ha publicado una web productiva.
+La Fase 1 continúa abierta hasta completar estos controles. Su interfaz ya está publicada por petición expresa del usuario; los módulos de las fases siguientes siguen pendientes.

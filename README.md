@@ -2,9 +2,11 @@
 
 Aplicación en desarrollo de la Fase 1 del PROMPT MAESTRO V2.0: acceso, roles, proyectos, persistencia y auditoría. IA, motor DigiProy, evidencias y exportación Excel corresponden a fases posteriores.
 
+URL pública de la Fase 1: **https://camposol-qa.ingbca-360.chatgpt.site**. Cualquier persona puede abrir el acceso; los proyectos requieren una cuenta confirmada y activada. La cuenta existente se conserva. Detalles de publicación: [Publicación de Fase 1](docs/PUBLICACION_FASE_1.md).
+
 Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . Se conserva el backend independiente `camposol-qa-dev`, proyecto Supabase `frhmxbdombsqubqlchkj`; los proyectos anteriores no se modifican.
 
-**Estado comprobado el 23/11/2026:** dependencias instaladas y lockfile versionado; 26 pruebas locales superadas, TypeScript correcto, builds local/Supabase y auditoría con cero vulnerabilidades. React revisado en escritorio y a 390 px con datos ficticios locales. La primera cuenta remota recibió el correo, quedó confirmada y fue activada como administradora con autorización explícita. El inicio de sesión real, la segunda cuenta, recuperación y OAuth completo siguen pendientes. La Fase 1 está abierta y la Fase 2 no ha comenzado. Ver [verificación](docs/VERIFICACION_FASE_1.md) y [continuación](docs/CONTINUACION_FASE_1.md).
+**Estado comprobado el 23/11/2026:** dependencias instaladas y lockfile versionado; 26 pruebas locales superadas, TypeScript correcto, builds local/Supabase y auditoría con cero vulnerabilidades. React revisado en escritorio y a 390 px con datos ficticios locales. La primera cuenta remota recibió el correo, quedó confirmada y fue activada como administradora con autorización explícita. Se comprobó el ingreso real de la administradora, creación y guardado de un proyecto ficticio, persistencia al recargar e historial remoto. La segunda cuenta, recuperación y OAuth completo siguen pendientes. La Fase 1 está abierta y la Fase 2 no ha comenzado. Ver [verificación](docs/VERIFICACION_FASE_1.md) y [continuación](docs/CONTINUACION_FASE_1.md).
 
 La actualización de código `4cfaae64d64308820f38539e52de7ac47040c6a9` pasó la [verificación de GitHub](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45246134440).
 
@@ -73,7 +75,7 @@ npm run preview:supabase
 
 El build queda en `dist-supabase/` y su vista previa usa http://127.0.0.1:5173 . El build local sigue en `dist/`.
 
-En Authentication ya se guardaron Site URL `http://127.0.0.1:5173/` y los retornos exactos `http://127.0.0.1:5173/` y `http://127.0.0.1:5173/#restablecer`. Añadir una URL productiva únicamente cuando se autorice su publicación.
+El usuario autorizó publicar una URL accesible para cualquier persona el 23/11/2026. Site URL de Auth ahora es `https://camposol-qa.ingbca-360.chatgpt.site/`. Los retornos públicos exactos son la raíz y `https://camposol-qa.ingbca-360.chatgpt.site/#restablecer`. Se conservan los dos retornos locales de desarrollo; no hay comodines.
 
 SMTP personalizado de Gmail quedó guardado y habilitado en el proyecto existente. Se recargó el panel y se comprobó que sigue activo con host `smtp.gmail.com`; Supabase muestra que hay una contraseña almacenada y oculta. No se leyó ni se versionó el secreto guardado. La entrega del correo de confirmación de la cuenta personal quedó comprobada y Auth registra su dirección confirmada. Falta comprobar la recuperación. Mostrar un mensaje en la interfaz no garantiza la entrega; no desactivar la confirmación para evitar ese paso. Las credenciales se administran directamente en Google y Supabase, fuera del código y del chat.
 
@@ -81,7 +83,7 @@ SMTP personalizado de Gmail quedó guardado y habilitado en el proyecto existent
 
 ### Confirmación desde otro dispositivo durante desarrollo
 
-El retorno actual es `http://127.0.0.1:5173/`. En un teléfono esa dirección apunta al propio teléfono, por lo que puede mostrar `ERR_CONNECTION_REFUSED` después de confirmar. Esto no demuestra un fallo de confirmación: se comprobó en Auth que la cuenta personal sí estaba confirmada. Para continuar hay que volver a la ventana de la aplicación en el entorno de desarrollo e iniciar sesión. La URL productiva se configurará cuando se autorice la publicación.
+El primer enlace se emitió con retorno local y el teléfono mostró `ERR_CONNECTION_REFUSED`, aunque Auth sí había confirmado el correo. Tras la publicación autorizada se configuró la URL HTTPS pública como retorno. Los próximos enlaces solicitados desde la web pública utilizan esa dirección. La prueba completa de recuperación en la URL pública sigue pendiente.
 
 ### Primeros administradores
 
@@ -105,7 +107,7 @@ Microsoft utiliza `signInWithOAuth`, proveedor `azure`, scope `email`. Requiere 
 
 ## Seguridad y límites de verificación
 
-26 pruebas locales y 30 comprobaciones RLS remotas previas superadas. Las pruebas remotas se revirtieron; antes del alta real había cero cuentas, perfiles y proyectos. La consulta posterior al registro confirmó 1 cuenta Auth, 1 perfil, 1 administrador de aplicación activo y 0 proyectos. Buckets privados y analizador de seguridad sin observaciones. No se repitió el esquema ni el script RLS.
+26 pruebas locales y 30 comprobaciones RLS remotas previas superadas. Las pruebas remotas se revirtieron; antes del alta real había cero cuentas, perfiles y proyectos. La consulta posterior al registro confirmó 1 cuenta Auth, 1 perfil, 1 administrador de aplicación activo y 0 proyectos. Después de la prueba de persistencia hay 1 proyecto técnico ficticio, archivado en versión 2. Buckets privados y analizador de seguridad sin observaciones. No se repitió el esquema ni el script RLS.
 
 `database/phase1-rls-tests.sql` requiere un backend de desarrollo vacío y acceso administrativo; no ejecutarlo con cuentas o proyectos existentes. Las pruebas locales crean sus propias bases temporales.
 
@@ -128,4 +130,4 @@ La revisión visual utilizó sesiones ficticias sobre una base SQLite independie
 
 ## Pendiente para cerrar la fase
 
-Inicio de sesión y permisos reales con la primera administradora ya activa; registro, confirmación y activación autorizada de la segunda cuenta; recuperación por correo; Microsoft cuando existan credenciales y permisos Entra. La publicación productiva requiere autorización según el prompt y no se ha realizado.
+Registro, confirmación y activación autorizada de la segunda cuenta; cierre y recuperación en la URL pública; completar comprobaciones con los roles reales; Microsoft cuando existan credenciales y permisos Entra. La interfaz de Fase 1 ya fue publicada con autorización expresa. La Fase 2 no ha comenzado.
