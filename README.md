@@ -6,7 +6,7 @@ Repositorio privado: https://github.com/brancoretto24102-ui/camposol-qa . Se con
 
 **Estado comprobado el 23/11/2026:** dependencias instaladas y lockfile versionado; 26 pruebas locales superadas, TypeScript correcto, builds local/Supabase y auditoría con cero vulnerabilidades. React revisado en escritorio y a 390 px con datos ficticios locales. La primera cuenta remota recibió el correo, quedó confirmada y fue activada como administradora con autorización explícita. El inicio de sesión real, la segunda cuenta, recuperación y OAuth completo siguen pendientes. La Fase 1 está abierta y la Fase 2 no ha comenzado. Ver [verificación](docs/VERIFICACION_FASE_1.md) y [continuación](docs/CONTINUACION_FASE_1.md).
 
-La actualización de código `3e03f3dfaefebd60047f8b994a4859a3ad3e7bf3` pasó la [verificación de GitHub](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45240846506).
+La actualización de código `4cfaae64d64308820f38539e52de7ac47040c6a9` pasó la [verificación de GitHub](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45246134440).
 
 ## Desarrollo local
 

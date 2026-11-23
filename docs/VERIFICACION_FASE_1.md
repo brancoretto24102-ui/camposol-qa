@@ -24,7 +24,7 @@ Fecha: 23/11/2026. Versión 0.1.0. Continuación del código existente en `main`
 | Microsoft y Google | Preparados y deshabilitados; Microsoft requiere datos y permisos Entra. |
 | Publicación productiva | No realizada. La Fase 2 no se ha iniciado. |
 
-La verificación de GitHub también terminó correctamente para el commit `3e03f3dfaefebd60047f8b994a4859a3ad3e7bf3`: [ejecución 45240846506](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45240846506). Instalación con lockfile, pruebas, tipos, build, auditoría e informe: todos correctos.
+La verificación de GitHub también terminó correctamente para el commit `4cfaae64d64308820f38539e52de7ac47040c6a9`: [ejecución 45246134440](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45246134440). Instalación con lockfile, pruebas, tipos, build, auditoría e informe: todos correctos.
 
 ## Revisión funcional observada en navegador
 

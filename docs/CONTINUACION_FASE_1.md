@@ -24,7 +24,7 @@ Actualizado el 23/11/2026 durante la continuación solicitada. Conservar el repo
 10. Cuenta personal registrada y correo confirmado en Auth. El retorno desde el celular mostró `ERR_CONNECTION_REFUSED` porque `127.0.0.1` apunta al teléfono; la confirmación sí se completó. El usuario autorizó explícitamente activarla como administradora de Camposol QA y se actualizó solo su UUID verificado. Consulta posterior: 1 cuenta Auth, 1 perfil, 1 administrador de aplicación activo y 0 proyectos. No volver a ejecutar las pruebas SQL remotas diseñadas para una base vacía.
 11. Se observó un mensaje en inglés por repetir la solicitud de registro. Se añadieron mensajes de Auth en español y un bloqueo de reenvío tras registro exitoso, con instrucciones para confirmar y volver a iniciar sesión. Después del cambio pasaron las 26 pruebas locales y ambos builds. La comprobación interactiva del siguiente registro se hará al crear la segunda cuenta.
 
-El commit de código `3e03f3dfaefebd60047f8b994a4859a3ad3e7bf3` pasó la [verificación de GitHub 45240846506](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45240846506), incluidos instalación limpia, pruebas, build y auditoría. Los commits posteriores solo de documentación pueden omitir CI.
+El commit de código `4cfaae64d64308820f38539e52de7ac47040c6a9` pasó la [verificación de GitHub 45246134440](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45246134440), incluidos instalación limpia, pruebas, build y auditoría. Los commits posteriores solo de documentación pueden omitir CI.
 
 Los detalles y los límites están en `docs/VERIFICACION_FASE_1.md`.
 
