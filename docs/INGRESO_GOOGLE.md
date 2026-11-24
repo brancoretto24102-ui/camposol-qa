@@ -48,13 +48,16 @@ Código publicado: [`8afeb870810370d14068c9c48eabaa36366b9acc`](https://github.c
 - [Pages 45415576014](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45415576014): compilación y publicación completed/success.
 - Página pública y recurso `index-W-Zwyhkf.js`: HTTP 200. El botón **Continuar con Google** se observó en una pestaña nueva, sin cerrar ni modificar la sesión anterior.
 - Al pulsarlo se abrió la página oficial **Acceder con Google → Elige una cuenta**, dirigida al dominio del backend correcto `frhmxbdombsqubqlchkj.supabase.co`. No se observó un error de cliente o de URI de retorno en ese recorrido. Se dejó al titular elegir la cuenta y completar el consentimiento.
+- El titular completó el acceso directamente en Google y se observó su regreso al tablero de Pages: nombre y rol de administrador, enlace Administración y proyectos existentes visibles. No se introdujeron credenciales ni se otorgó consentimiento con herramientas.
+- La consulta posterior de solo lectura confirmó: **1 usuario Auth, 1 perfil, 1 administrador activo y 1 identidad Google**. La identidad Google pertenece al UUID de la administradora original; ese perfil conserva `active=true` y `role=administrador`. No se creó un usuario duplicado ni se ejecutaron cambios manuales de roles o fusión de cuentas.
 
-## Continuación necesaria
+## Estado final y seguimiento
 
 1. La configuración de Google Auth Platform y el proveedor Supabase ya existen y están comprobados. No repetir la aceptación, crear otro proyecto ni pedir credenciales por el chat.
 2. Pages ya está publicado con `VITE_GOOGLE_ENABLED=true`. No volver a publicar ni cambiar credenciales si no se ha observado un fallo.
-3. El titular completa su primer acceso de Google directamente en el navegador. Comprobar retorno, perfil y permisos; conservar la cuenta administradora existente. La prueba unitaria del SDK y la pantalla de selección de cuenta no sustituyen este acceso real.
+3. El primer ingreso real de Google y su vinculación al perfil administrador existente quedaron comprobados. Las pruebas unitarias se complementaron con esa revisión real; no se modificó ni cerró la sesión anterior.
+4. No se ha probado una segunda cuenta Google nueva ni una cuenta corporativa administrada. El alta de un usuario nuevo mantiene la regla de lector inactivo y activación por un administrador. Los demás pendientes de Fase 1, incluidos Microsoft y recuperación de contraseña, siguen registrados en su documento.
 
-No se ha comprobado aún una sesión real de Google ni la vinculación con el perfil existente. No anunciar el ingreso como activo hasta completar la configuración, la publicación y esa revisión.
+El ingreso con Google está activo y publicado. La publicación/verificación de marca ante Google no forma parte de esta activación; se conserva la identificación por el dominio del backend y el alcance limitado de identidad documentado arriba.
 
 Documentación primaria: [Supabase — Login with Google](https://supabase.com/docs/guides/auth/social-sign-in/auth-google), [Google — Manage App Audience](https://support.google.com/cloud/answer/15549945?hl=en), [Google — OAuth App Verification](https://support.google.com/cloud/answer/13463073).
