@@ -1,12 +1,16 @@
 # Camposol QA · 0.1.0
 
-Aplicación con Fase 3 de asistencia opcional: metodología DigiProy versionada, cartillas, casos y pasos, revisión humana, matriz e historial; chat integrado con Groq Free, prompts manuales para ChatGPT, Gemini, Claude y Copilot, y adaptadores opcionales de API propia para OpenAI, Gemini y Claude.
+Aplicación con capturas por paso y exportación Excel, además de la asistencia de Fase 3: metodología DigiProy versionada, cartillas, casos y pasos, revisión humana, matriz e historial; chat integrado con Groq Free, prompts manuales para ChatGPT, Gemini, Claude y Copilot, y adaptadores opcionales de API propia para OpenAI, Gemini y Claude.
 
 URL pública: **https://brancoretto24102-ui.github.io/camposol-qa/**. Se conserva el repositorio y Supabase `camposol-qa-dev` (`frhmxbdombsqubqlchkj`). Los proyectos requieren una cuenta confirmada, activada y autorizada.
 
-**Verificación de Fase 3:** 88 pruebas locales superadas después de incorporar el chat; las 28 comprobaciones RLS anteriores siguen documentadas. Las compilaciones comprueban también los tipos del intermediario de IA. El chat solo se habilita después de configurar una clave de servidor y confirmar una organización Groq Free. No se almacenan claves personales ni se convierten solicitudes a servicios de pago. Estado, pruebas y límites: [verificación de Fase 3](docs/VERIFICACION_FASE_3.md).
+**Verificación actual:** 101 pruebas locales superadas y 27 comprobaciones remotas de capturas/Storage en una transacción revertida; las comprobaciones RLS anteriores siguen documentadas. Las compilaciones comprueban también los tipos del intermediario de IA. El chat solo se habilita después de configurar una clave de servidor y confirmar una organización Groq Free. No se almacenan claves personales ni se convierten solicitudes a servicios de pago. Estado, pruebas y límites: [verificación de Fase 3](docs/VERIFICACION_FASE_3.md).
 
-Uso y continuación: [Continuación de Fase 3](docs/CONTINUACION_FASE_3.md). [Activación y uso del chat gratuito](docs/CHAT_GRATUITO.md). Las propuestas se revisan y aplican como borradores, con las aprobaciones de Fase 2. Las personas usuarias no necesitan una clave propia para el chat administrado. Las alternativas manuales no requieren API; la API personal requiere credencial temporal, modelo compatible y autorización de cada envío. La segunda cuenta y la recuperación de Fase 1 siguen pendientes. Evidencias y Excel corresponden a las fases siguientes.
+Uso y continuación: [Continuación de Fase 3](docs/CONTINUACION_FASE_3.md). [Activación y uso del chat gratuito](docs/CHAT_GRATUITO.md). Las propuestas se revisan y aplican como borradores, con las aprobaciones de Fase 2. Las personas usuarias no necesitan una clave propia para el chat administrado. Las alternativas manuales no requieren API; la API personal requiere credencial temporal, modelo compatible y autorización de cada envío. La segunda cuenta y la recuperación de Fase 1 siguen pendientes. Capturas y Excel ya están incorporados: [uso y verificación](docs/CONTINUACION_FASE_4.md).
+
+## Capturas y Excel
+
+En **Cartilla → 3. Casos y pasos**, guarda el caso y adjunta las capturas al paso correspondiente. En **Matriz → Descargar Excel**, cada paso tiene su hoja Referencia 01, Referencia 02, etc., con las imágenes incrustadas. El vínculo de la columna J abre esa hoja y **Regresar** vuelve a la misma celda J. Se admiten PNG/JPG de hasta 5 MB, cinco por paso. Si cambia el paso, revisa las capturas anteriores antes de exportar.
 
 ## Desarrollo local
 

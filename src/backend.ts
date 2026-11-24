@@ -1,3 +1,4 @@
+import type {Evidence,EvidenceInput,EvidenceState} from './evidence-domain.ts';
 import type {AIPreferences,AIGenerateInput,AIResult} from './ai-domain.ts';
 import type {AIChatInput,AIChatResult,FreeChatStatus} from './ai-chat-domain.ts';
 import type { Application, AuditEvent, Member, Profile, Project, ProjectInput, Role } from './domain.ts';
@@ -5,6 +6,11 @@ import type { MethodologyInput, MethodologyVersion, QACommand, QADocument, QAPro
 export interface BackendInfo { mode:'local'|'supabase'; bootstrap_required:boolean; microsoft_enabled:boolean; google_enabled:boolean }
 export interface AccountInput { full_name:string; email:string; password:string; role?:Role }
 export interface Backend {
+  evidenceManifest(projectId:string):Promise<EvidenceState>;
+  attachEvidence(projectId:string,version:number,caseId:string,stepId:string,input:EvidenceInput,bytes:Uint8Array):Promise<Evidence>;
+  finishEvidence(id:string,version:number):Promise<Evidence>;
+  retireEvidence(id:string,version:number):Promise<void>;
+  evidenceBytes(evidence:Evidence):Promise<Uint8Array>;
   aiPreferences():Promise<AIPreferences>;
   saveAIPreferences(input:AIPreferences):Promise<AIPreferences>;
   aiGenerate(input:AIGenerateInput):Promise<AIResult>;
@@ -36,6 +42,11 @@ export class LocalBackend implements Backend {
     const response=await fetch(`/api${path}`,{method,credentials:'same-origin',headers:{'Content-Type':'application/json',...(this.csrf?{'X-CSRF-Token':this.csrf}:{})},...(body!==undefined?{body:JSON.stringify(body)}:{})});
     const value=await response.json();if(!response.ok)throw new Error(value.error??'No fue posible completar la operación.');return value as T;
   }
+  evidenceManifest(id:string){return this.request<EvidenceState>('/qa/projects/'+id+'/evidence');}
+  async attachEvidence(projectId:string,version:number,caseId:string,stepId:string,input:EvidenceInput,bytes:Uint8Array){const base64=btoa(Array.from(bytes,b=>String.fromCharCode(b)).join(''));return this.request<Evidence>('/qa/projects/'+projectId+'/evidence','POST',{version,case_id:caseId,step_id:stepId,input,base64});}
+  finishEvidence(id:string,version:number){return this.request<Evidence>('/qa/evidence/'+id+'/finish','POST',{version});}
+  async retireEvidence(id:string,version:number){await this.request('/qa/evidence/'+id+'/retire','POST',{version});}
+  async evidenceBytes(e:Evidence){const r=await this.request<{base64:string}>('/qa/evidence/'+e.id+'/bytes');return Uint8Array.from(atob(r.base64),c=>c.charCodeAt(0));}
   aiPreferences(){return this.request<AIPreferences>('/ai/preferences');}
   saveAIPreferences(input:AIPreferences){return this.request<AIPreferences>('/ai/preferences','PUT',input);}
   aiGenerate(input:AIGenerateInput){return this.request<AIResult>('/ai/generate','POST',input);}

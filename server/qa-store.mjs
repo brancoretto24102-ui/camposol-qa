@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import {EvidenceStore} from './evidence-store.mjs';
 import {
   applyQACommand, digiProyConfig, digiProySource, newContent, validateMethodology,
   requireQA, text, object, identifier, documentProgress, invalidateContent,
@@ -33,6 +34,7 @@ export class QAStore {
       (id,application_id,methodology_key,name,version_label,source_reference,config,status,revision)
       VALUES(?,'digiproy','digiproy','DigiProy','1.0',?,?,'aprobado',1)`)
       .run(randomUUID(),digiProySource,JSON.stringify(digiProyConfig));
+    this.evidence=new EvidenceStore(store);
   }
   applications(user){
     const u=this.store.requireUser(user),ids=new Set(this.store.listProjects(u).map(p=>p.application_id));

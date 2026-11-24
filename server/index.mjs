@@ -10,6 +10,7 @@ const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.ico':'image/x-icon'};
 const equal=(a,b)=>typeof a==='string'&&typeof b==='string'&&Buffer.byteLength(a)===Buffer.byteLength(b)&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 export function createApp({store=new Store(resolve(root,process.env.QA_DATA_DIR??'.data','camposol-qa.sqlite')),dataDir=resolve(root,process.env.QA_DATA_DIR??'.data'),allowedOrigins=['http://127.0.0.1:5173','http://localhost:5173','http://127.0.0.1:4317','http://localhost:4317']}={}) {
+  if(/^\d{1,5}$/.test(process.env.QA_DEV_PORT??'')&&Number(process.env.QA_DEV_PORT)>0&&Number(process.env.QA_DEV_PORT)<=65535)allowedOrigins=[...allowedOrigins,'http://127.0.0.1:'+process.env.QA_DEV_PORT,'http://localhost:'+process.env.QA_DEV_PORT];
   const attempts=new Map();
   function send(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(data));}
   async function body(req,maximum=40_000){let raw='';for await(const chunk of req){raw+=chunk; if(Buffer.byteLength(raw)>maximum)throw new AppError(413,'La solicitud es demasiado grande.');}try{const v=JSON.parse(raw||'{}');if(v===null||Array.isArray(v)||typeof v!=='object')throw 0;return v;}catch{throw new AppError(400,'La solicitud no contiene un objeto JSON válido.');}}
@@ -59,6 +60,18 @@ export function createApp({store=new Store(resolve(root,process.env.QA_DATA_DIR?
       const qa=path.match(/^\/api\/qa\/projects\/([a-f0-9-]{36})$/);
       if(qa&&req.method==='GET')return send(res,200,store.qa.get(user,qa[1]));
       if(qa&&req.method==='POST'){const input=await body(req,2_100_000);return send(res,200,store.qa.command(user,qa[1],input.version,input.command));}
+      const captures=path.match(/^\/api\/qa\/projects\/([a-f0-9-]{36})\/evidence$/);
+      if(captures&&req.method==='GET')return send(res,200,store.qa.evidence.manifest(user,captures[1]));
+      if(captures&&req.method==='POST'){
+        const input=await body(req,7_100_000);
+        if(typeof input.base64!=='string'||input.base64.length>6_990_508||input.base64.length%4!==0||!/^[A-Za-z0-9+/]*={0,2}$/.test(input.base64))throw new AppError(422,'La captura no tiene un formato válido.');
+        return send(res,201,await store.qa.evidence.attach(user,captures[1],input.version,input.case_id,input.step_id,input.input,new Uint8Array(Buffer.from(input.base64,'base64'))));
+      }
+      const capture=path.match(/^\/api\/qa\/evidence\/([a-f0-9-]{36})\/(bytes|finish|retire)$/);
+      if(capture&&capture[2]==='bytes'&&req.method==='GET')return send(res,200,{base64:Buffer.from(store.qa.evidence.bytes(user,capture[1])).toString('base64')});
+      if(capture&&capture[2]==='finish'&&req.method==='POST'){const input=await body(req);return send(res,200,store.qa.evidence.finish(user,capture[1],input.version));}
+      if(capture&&capture[2]==='retire'&&req.method==='POST'){const input=await body(req);store.qa.evidence.retire(user,capture[1],input.version);return send(res,200,{ok:true});}
+
       const qaHistory=path.match(/^\/api\/qa\/projects\/([a-f0-9-]{36})\/history$/);
       if(qaHistory&&req.method==='GET')return send(res,200,store.qa.history(user,qaHistory[1],Number(url.searchParams.get('offset')??0)));
       const qaRevision=path.match(/^\/api\/qa\/projects\/([a-f0-9-]{36})\/history\/(\d+)$/);

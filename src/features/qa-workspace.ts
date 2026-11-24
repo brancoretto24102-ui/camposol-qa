@@ -9,6 +9,7 @@ import {Alert,Button,Empty,PageTitle,dateTime} from '../ui.ts';
 import {message,value} from '../forms.ts';
 import {moveItem,QAField,ReviewBadge,ReviewInfo} from './qa-common.ts';
 import {MatrixPreview} from './qa-matrix.ts';
+import {CaseEvidence,ExcelDownload} from './qa-evidence.ts';
 import {CartillaAIAssistant} from './ai-workspace.ts';
 import type {AITask} from '../ai-domain.ts';
 
@@ -73,7 +74,7 @@ function SelectionEditor({doc,actor,method,run,busy,onDirty}:{doc:QADocument;act
     h('section',{className:'panel form-panel'},h('h2',null,'Aprobación del conjunto de casos'),doc.content.context.review.status!=='aprobado'&&h('p',{className:'notice info'},'El contexto debe estar aprobado antes de revisar la selección.'),h(ReviewActions,{review:doc.content.selection,actor,scope:'selection',run,busy,dirty})));
 }
 
-function CaseEditor({doc,actor,method,caseId,onNavigate,run,busy,onDirty}:{doc:QADocument;actor:QAActor;method:MethodologyVersion;caseId:string;onNavigate:(id:string)=>void;run:Run;busy:boolean;onDirty:Dirty}){
+function CaseEditor({backend,doc,actor,method,caseId,onNavigate,run,busy,onBusy,onDirty}:{backend:Backend;doc:QADocument;actor:QAActor;method:MethodologyVersion;caseId:string;onNavigate:(id:string)=>void;run:Run;busy:boolean;onBusy:(busy:boolean)=>void;onDirty:Dirty}){
   const c=doc.content.cases.find(c=>c.id===caseId)!;
   const [requirement,setRequirement]=useState(c.requirement),[description,setDescription]=useState(c.description),[comment,setComment]=useState(c.comment),[steps,setSteps]=useState<CaseStep[]>(structuredClone(c.steps)),[error,setError]=useState(''),[pending,setPending]=useState('');
   const body={requirement,description,comment,steps},dirty=JSON.stringify(body)!==JSON.stringify({requirement:c.requirement,description:c.description,comment:c.comment,steps:c.steps});useDirty(dirty,onDirty);
@@ -103,6 +104,7 @@ function CaseEditor({doc,actor,method,caseId,onNavigate,run,busy,onDirty}:{doc:Q
         actor.can_edit&&h('div',{className:'form-actions'},h('span',{className:'small muted'},dirty?'Cambios sin guardar':'Contenido guardado'),h(Button,{type:'submit',disabled:busy},busy?'Guardando…':'Guardar caso en borrador'))),
       invalid&&h('p',{className:'small muted'},`Para revisión: ${invalid}`),h(ReviewActions,{review:c.review,actor,scope:'case',caseId:c.id,run,busy,dirty}),
       h('div',{className:'qa-case-navigation'},h(Button,{variant:'secondary',disabled:busy||index===0,onClick:()=>navigate(included[index-1].id)},'Caso anterior'),h(Button,{variant:'secondary',disabled:busy||index===included.length-1,onClick:()=>navigate(included[index+1].id)},'Caso siguiente'))),
+      h(CaseEvidence,{backend,doc,caseId:c.id,canEdit:actor.can_edit,dirty,busy,onBusy}),
       h('section',{className:'panel form-panel'},h('h2',null,dirty?'Vista previa del borrador':'Vista previa de la fila'),h(MatrixPreview,{content:preview,config:method.config,caseId:c.id}))));
 }
 
@@ -142,8 +144,8 @@ export function QAWorkspace({backend,profile,id,onChanged}:{backend:Backend;prof
     dirty&&h('p',{className:'small qa-unsaved',role:'status'},'Tienes cambios sin guardar. Guarda el borrador para cambiar de sección.'),
     tab==='context'&&h(ContextEditor,{key:doc.version,doc,actor,run,busy,onDirty:setDirty}),
     tab==='selection'&&h(SelectionEditor,{key:doc.version,doc,actor,method,run,busy,onDirty:setDirty}),
-    tab==='cases'&&(doc.content.context.review.status!=='aprobado'||doc.content.selection.status!=='aprobado'?h('section',{className:'panel'},h(Empty,{title:'Aprueba primero el contexto y la selección',text:'El editor se habilita con el conjunto de casos revisado.'})):activeCase?h(CaseEditor,{key:`${activeCase}-${doc.version}`,doc,actor,method,caseId:activeCase,onNavigate:setCaseId,run,busy,onDirty:setDirty}):h('section',{className:'panel'},h(Empty,{title:'No hay casos incluidos',text:'Revisa la selección de casos.'}))),
-    tab==='matrix'&&h('section',{className:'panel form-panel'},h('h2',null,'Vista previa de la matriz'),h('p',{className:'muted'},'Muestra el contenido guardado. Los estados de aprobación se consultan en cada caso.'),h(MatrixPreview,{content:doc.content,config:method.config})),
+    tab==='cases'&&(doc.content.context.review.status!=='aprobado'||doc.content.selection.status!=='aprobado'?h('section',{className:'panel'},h(Empty,{title:'Aprueba primero el contexto y la selección',text:'El editor se habilita con el conjunto de casos revisado.'})):activeCase?h(CaseEditor,{key:`${activeCase}-${doc.version}`,backend,doc,actor,method,caseId:activeCase,onNavigate:setCaseId,run,busy,onBusy:setBusy,onDirty:setDirty}):h('section',{className:'panel'},h(Empty,{title:'No hay casos incluidos',text:'Revisa la selección de casos.'}))),
+    tab==='matrix'&&h('section',{className:'panel form-panel'},h(ExcelDownload,{backend,project,doc,methodology:method,disabled:busy||dirty,onBusy:setBusy}),h('h2',null,'Vista previa de la matriz'),h('p',{className:'muted'},'Muestra el contenido guardado. Los estados de aprobación se consultan en cada caso.'),h(MatrixPreview,{content:doc.content,config:method.config})),
     tab==='ai'&&actor.can_edit&&h(CartillaAIAssistant,{key:`${project.id}-${doc.version}`,backend,context:{project,document:doc,methodology:method},initialTask:assistantTask,caseId:activeCase,run}),
     tab==='history'&&h(DocumentHistory,{backend,id,method}));
 }

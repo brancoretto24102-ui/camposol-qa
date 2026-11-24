@@ -1,3 +1,4 @@
+import {validateEvidenceInput,verifyCapture,EVIDENCE_BUCKET,type Evidence,type EvidenceInput,type EvidenceState} from './evidence-domain.ts';
 import {defaultAIPreferences,type AIPreferences,type AIGenerateInput,type AIResult} from './ai-domain.ts';
 import type {AIChatInput,AIChatResult,FreeChatStatus} from './ai-chat-domain.ts';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -25,6 +26,16 @@ export class SupabaseBackend implements Backend {
   private client:SupabaseClient;
   private current:Profile|null=null;
   constructor(){const url=import.meta.env.VITE_SUPABASE_URL,key=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;if(!url||!key)throw new Error('Falta configurar la URL y la clave publicable del backend independiente.');this.client=createClient(url,key,{auth:{storage:window.sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});}
+  async evidenceManifest(target:string){const {data,error}=await this.client.rpc('qa_evidence_manifest',{target});check(error);if(!data)throw new Error('La cartilla no está disponible.');return data as EvidenceState;}
+  async attachEvidence(target:string,version:number,caseId:string,stepId:string,value:EvidenceInput,bytes:Uint8Array){
+    const input=validateEvidenceInput(value);await verifyCapture(bytes,input);
+    const {data,error}=await this.client.rpc('qa_evidence_prepare',{target,expected_version:version,target_case:caseId,target_step:stepId,input});check(error);const e=data as Evidence;
+    const {error:uploadError}=await this.client.storage.from(EVIDENCE_BUCKET).upload(e.object_path,new Blob([new Uint8Array(bytes).buffer],{type:input.mime_type}),{contentType:input.mime_type,upsert:false,cacheControl:'60'});
+    if(uploadError)throw new Error('La captura no se pudo cargar. Revisa la carga pendiente; puedes retirarla y volver a adjuntar el archivo.');return this.finishEvidence(e.id,version);
+  }
+  async finishEvidence(target:string,version:number){const {data,error}=await this.client.rpc('qa_evidence_finish',{target,expected_version:version});check(error);return data as Evidence;}
+  async retireEvidence(target:string,version:number){const {error}=await this.client.rpc('qa_evidence_retire',{target,expected_version:version});check(error);}
+  async evidenceBytes(e:Evidence){const {data,error}=await this.client.storage.from(EVIDENCE_BUCKET).download(e.object_path);check(error);if(!data)throw new Error('La captura no está disponible.');const bytes=new Uint8Array(await data.arrayBuffer());await verifyCapture(bytes,e);return bytes;}
   async aiPreferences(){if(!this.current)await this.session();if(!this.current)throw new Error('Inicia sesión.');const {data,error}=await this.client.from('ai_provider_preferences').select('provider,mode,model,version').eq('user_id',this.current.id).maybeSingle();check(error);return data?data as AIPreferences:{...defaultAIPreferences};}
   async saveAIPreferences(input:AIPreferences){const {data,error}=await this.client.rpc('qa_ai_preferences_save',{input});check(error);return data as AIPreferences;}
   private async invokeAI<T>(input:Record<string,unknown>):Promise<T>{const {data,error}=await this.client.functions.invoke('qa-ai',{body:input});if(error){const response=(error as {context?:Response}).context;if(response instanceof Response){try{const body=await response.json();throw new Error(typeof body.error==='string'?body.error:'No fue posible completar la solicitud de IA.');}catch(e){if(e instanceof Error&&e.name!=='SyntaxError')throw e;}}throw new Error('No fue posible conectar con el intermediario de IA. No se reintentó el envío.');}if(!data)throw new Error('La IA no devolvió una respuesta.');return data as T;}
