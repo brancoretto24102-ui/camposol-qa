@@ -1,10 +1,11 @@
 # Continuar Camposol QA — Fase 3
 
-Actualizado el 23/11/2026, hora de Perú. El usuario solicitó implementar Fase 3 y después indicó continuar. Se conservan el repositorio `brancoretto24102-ui/camposol-qa`, la URL https://brancoretto24102-ui.github.io/camposol-qa/ y el backend Supabase `frhmxbdombsqubqlchkj` (`camposol-qa-dev`). No crear otro repositorio, Site ni backend.
+Actualizado el 24/11/2026, hora de Perú. El usuario solicitó implementar Fase 3 y después indicó continuar. Se conservan el repositorio `brancoretto24102-ui/camposol-qa`, la URL https://brancoretto24102-ui.github.io/camposol-qa/ y el backend Supabase `frhmxbdombsqubqlchkj` (`camposol-qa-dev`). No crear otro repositorio, Site ni backend.
 
 ## Funciones incorporadas
 
-- «Mi inteligencia artificial»: preferencias privadas de proveedor, modalidad y modelo, independientes del inicio de sesión. La opción inicial es Ninguna IA.
+- «Chat gratuito» integrado con Groq Free como primera modalidad del asistente. Disponible para perfiles activos con permiso de edición en la cartilla; no requiere una clave API de cada persona.
+- «Mi inteligencia artificial»: preferencias privadas de proveedor, modalidad y modelo para la otra IA opcional, independientes del inicio de sesión. La preferencia inicial de esa modalidad es Ninguna IA.
 - Modalidad manual para ChatGPT, Google Gemini, Claude y Microsoft Copilot: preparar prompt, revisar y anonimizar, autorizar, copiar, abrir la cuenta elegida, pegar respuesta, validar, editar y aplicar como borrador.
 - Asistente contextual para analizar funcionalidades, proponer casos, revisar cobertura, generar un caso, mejorar o acortar redacción, revisar argumentos y revisar resultados.
 - Adaptadores de API propia de OpenAI, Gemini y Claude mediante un intermediario autenticado en el backend existente. La credencial se introduce para cada envío y no se persiste.
@@ -49,7 +50,7 @@ La clave API vive solo en memoria durante el envío. Se borra del campo al inici
 
 Límites técnicos: prompt de 64.000 caracteres; respuesta importada de 140 KB; salida API de 4.096 tokens; 50 segundos de conexión; respuesta HTTP del proveedor limitada a 1 MB. Por cuenta, cuatro intentos por minuto y veinte por una ventana de 24 horas. Estos límites no constituyen un presupuesto monetario. Un intento fallido también ocupa cuota interna.
 
-La infraestructura no incorpora claves compartidas ni activa facturación de los proveedores. Las pruebas de los adaptadores usan transporte controlado; no se realizaron generaciones pagadas ni se introdujeron claves reales. La operación con el modelo y credencial de cada titular sigue requiriendo su comprobación.
+La modalidad API propia no incorpora claves compartidas ni activa facturación de los proveedores. Sus adaptadores se probaron con transporte controlado; la operación con el modelo y credencial de cada titular sigue requiriendo su comprobación. El chat gratuito tiene una conexión administrada distinta, configurada como secreto del servidor y comprobada con Groq Free; no se realizaron generaciones pagadas.
 
 ## Microsoft Copilot
 
@@ -77,7 +78,7 @@ Las compilaciones incluyen TypeScript del frontend y del intermediario mediante 
 
 ## Estado y continuación
 
-Extensión del 24/11/2026: el usuario priorizó un chat gratuito integrado con otro proveedor tras revisar la elegibilidad de Sign in with ChatGPT. Se implementó «Chat gratuito» con Groq como primera modalidad del asistente, conservando las opciones anteriores y los permisos. Activación, límites, comprobaciones y pendientes: [CHAT_GRATUITO.md](CHAT_GRATUITO.md). La conexión no se considera activada hasta configurar sus secretos de servidor y comprobarla con una organización Free; no pedir ni publicar una clave por chat.
+Extensión del 24/11/2026: el usuario priorizó un chat gratuito integrado con otro proveedor tras revisar la elegibilidad de Sign in with ChatGPT. **Groq Free está activado y comprobado en la URL pública.** El administrador guardó los secretos directamente en Supabase. Se verificaron dos respuestas reales en una conversación, una propuesta editable y su guardado como borrador, con persistencia tras recargar. Se archivó la cartilla ficticia `QA-F3-FREE-001` (proyecto versión 2; documento versión 3; tres revisiones). La cartilla de trabajo se conservó sin cambios y sin compartir sus requisitos. Código publicado [`df0dfd7611354e042dad45b1182a86913339bfd2`](https://github.com/brancoretto24102-ui/camposol-qa/commit/df0dfd7611354e042dad45b1182a86913339bfd2), 88 pruebas superadas y ambos flujos correctos. Activación, límites y detalle de comprobaciones: [CHAT_GRATUITO.md](CHAT_GRATUITO.md). No pedir ni publicar una clave por chat. La conexión compartida permanece limitada al plan Free; no cambia automáticamente a una API de pago.
 
 Código publicado `d776947a593c21ff20751bf1e340a9e240b3e0f6`; ambos flujos de GitHub terminaron correctamente. La revisión se realizó en la URL pública con la sesión existente y respuestas controladas. La cartilla técnica quedó archivada y se restauró Ninguna IA. Resultados de pruebas, revisión visual y publicación: [VERIFICACION_FASE_3.md](VERIFICACION_FASE_3.md). Los pendientes de acceso de Fase 1 siguen documentados: segunda cuenta, recuperación real y OAuth autorizado. No se modificó SMTP ni se elevaron permisos.
 

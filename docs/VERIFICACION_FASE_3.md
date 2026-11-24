@@ -75,4 +75,20 @@ El usuario eligió un chat gratuito con otro proveedor después de verificar las
 
 **88 pruebas superadas**, cero fallos u omisiones: las 73 previas y 15 de chat. Se verificaron contexto de QA, historial alternado y limitado, rechazo de claves/modelos/URLs del cliente, configuración inactiva, endpoint y modelo fijos, ausencia de herramientas y secretos, errores de proveedor sin reintentos, truncamiento, validación de propuestas, aplicación humana como borrador, permisos y versiones, cuotas persistentes, disponibilidad autenticada y CSRF local. Las compilaciones local y Supabase y los chequeos TypeScript fueron correctos.
 
-Se desplegó `qa-ai` versión 4, ACTIVE y con JWT obligatorio, sin tablas, migraciones ni dependencias nuevas. El transporte del chat utiliza datos ficticios en las pruebas; su conexión real queda pendiente de configurar una cuenta Groq Free y comprobar un intercambio en la URL pública. Detalles y procedimiento de cierre: [CHAT_GRATUITO.md](CHAT_GRATUITO.md).
+Se desplegó `qa-ai` versión 4, ACTIVE y con JWT obligatorio, sin tablas, migraciones ni dependencias nuevas. Solicitud sin JWT: 401; preflight autorizado: 204. Código publicado [`df0dfd7611354e042dad45b1182a86913339bfd2`](https://github.com/brancoretto24102-ui/camposol-qa/commit/df0dfd7611354e042dad45b1182a86913339bfd2). [Verificación 45345747958](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45345747958) y [Pages 45345747988](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45345747988): ambos `completed/success`. Página y JavaScript públicos: HTTP 200.
+
+### Activación y prueba real
+
+Se observó «Free · $0 · Current Plan» en la consola oficial de Groq. El administrador creó la conexión y guardó `GROQ_API_KEY` y `GROQ_FREE_PLAN_CONFIRMED` directamente en los secretos del proyecto Supabase existente. Solo se comprobaron los nombres guardados; no se leyó, copió ni publicó el valor de la clave. No se añadió tarjeta ni se contrató Developer.
+
+En la URL pública se utilizó una cartilla nueva de datos exclusivamente ficticios, `QA-F3-FREE-001`, sin crear cuentas ni cambiar roles:
+
+1. Disponibilidad real positiva y contexto revisado limitado a la cartilla ficticia.
+2. Resumen solicitado y respondido dentro del chat por Groq.
+3. Segundo mensaje conservando el hilo: propuesta de análisis validada, con una sola funcionalidad y cita literal. La propuesta apareció editable en la propia página, sin pegar JSON.
+4. Descripción editada antes de aplicar. El botón de guardado estaba deshabilitado sin marcar la revisión y habilitado después de marcarla.
+5. Guardado como borrador y recarga. Se recuperó la descripción editada: documento versión 3, contexto en borrador, una funcionalidad, identificador anterior conservado y tres revisiones. No se aprobó automáticamente.
+6. Archivo de la cartilla técnica: proyecto versión 2, documento versión 3 y sus tres revisiones conservadas. La interfaz archivada ya no ofreció el asistente de edición.
+7. Retorno a la cartilla de trabajo: servicio disponible, cero mensajes y autorización desmarcada. Sus requisitos no se enviaron y su contenido no se modificó. Las preferencias personales de la otra IA tampoco se cambiaron.
+
+Esta prueba real cubre conversación y análisis. Las otras tareas mantienen las pruebas automatizadas y los requisitos de etapa. La cuota es gratuita, compartida y limitada; no existe conmutación automática a consumo de pago. Detalles de operación: [CHAT_GRATUITO.md](CHAT_GRATUITO.md).
