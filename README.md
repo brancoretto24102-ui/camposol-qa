@@ -4,7 +4,7 @@ Aplicación con Fase 3 de asistencia opcional: metodología DigiProy versionada,
 
 URL pública: **https://brancoretto24102-ui.github.io/camposol-qa/**. Se conserva el repositorio y Supabase `camposol-qa-dev` (`frhmxbdombsqubqlchkj`). Los proyectos requieren una cuenta confirmada, activada y autorizada.
 
-**Verificación de Fase 3:** 66 pruebas locales y 28 comprobaciones RLS remotas superadas. Las compilaciones comprueban también los tipos del intermediario de IA. Ninguna IA se activa por defecto; no se almacenan claves ni se realizaron llamadas pagadas. Estado de publicación y pruebas interactivas: [verificación de Fase 3](docs/VERIFICACION_FASE_3.md).
+**Verificación de Fase 3:** 66 pruebas locales y 28 comprobaciones RLS remotas superadas. Las compilaciones comprueban también los tipos del intermediario de IA. Ninguna IA se activa por defecto; no se almacenan claves ni se realizaron llamadas pagadas. Código publicado `d776947a593c21ff20751bf1e340a9e240b3e0f6`, con ambos flujos de GitHub correctos. El recorrido manual se comprobó en la URL pública con una cartilla ficticia, archivada al terminar. Estado de publicación y pruebas interactivas: [verificación de Fase 3](docs/VERIFICACION_FASE_3.md).
 
 Uso y continuación: [Continuación de Fase 3](docs/CONTINUACION_FASE_3.md). Las propuestas se revisan y aplican como borradores, con las aprobaciones de Fase 2. La modalidad manual no requiere una API. Las conexiones API requieren credencial temporal, modelo compatible y autorización de cada envío. La segunda cuenta y la recuperación de Fase 1 siguen pendientes. Evidencias y Excel corresponden a las fases siguientes.
 

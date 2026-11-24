@@ -71,7 +71,7 @@ Las compilaciones incluyen TypeScript del frontend y del intermediario mediante 
 
 ## Estado y continuación
 
-Resultados de pruebas, revisión visual y publicación: [VERIFICACION_FASE_3.md](VERIFICACION_FASE_3.md). Los pendientes de acceso de Fase 1 siguen documentados: segunda cuenta, recuperación real y OAuth autorizado. No se modificó SMTP ni se elevaron permisos.
+Código publicado `d776947a593c21ff20751bf1e340a9e240b3e0f6`; ambos flujos de GitHub terminaron correctamente. La revisión se realizó en la URL pública con la sesión existente y respuestas controladas. La cartilla técnica quedó archivada y se restauró Ninguna IA. Resultados de pruebas, revisión visual y publicación: [VERIFICACION_FASE_3.md](VERIFICACION_FASE_3.md). Los pendientes de acceso de Fase 1 siguen documentados: segunda cuenta, recuperación real y OAuth autorizado. No se modificó SMTP ni se elevaron permisos.
 
 El aviso previo de contraseñas filtradas deshabilitadas permanece: [referencia oficial](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). La política explícita de contadores eliminó la nueva observación informativa de RLS sin política.
 
