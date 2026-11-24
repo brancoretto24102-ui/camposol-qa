@@ -113,7 +113,9 @@ Los usuarios nuevos comienzan como lectores inactivos, incluso con correo confir
 
 ### Microsoft y Google
 
-Microsoft utiliza `signInWithOAuth`, proveedor `azure`, scope `email`. Requiere una aplicación Entra, tipo de cuenta personal/empresarial, tenant cuando corresponda, client ID, secreto y URI de retorno. El secreto se configura en Supabase. Solo habilitar `VITE_MICROSOFT_ENABLED=true` tras verificar permisos y configuración. Google sigue preparado y deshabilitado. El acceso con Microsoft no conecta Microsoft Copilot.
+Microsoft utiliza `signInWithOAuth`, proveedor `azure`, scope `email`. Requiere una aplicación Entra, tipo de cuenta personal/empresarial, tenant cuando corresponda, client ID, secreto y URI de retorno. El secreto se configura en Supabase. Solo habilitar `VITE_MICROSOFT_ENABLED=true` tras verificar permisos y configuración. El acceso con Microsoft no conecta Microsoft Copilot.
+
+Google utiliza el mismo backend y el flujo PKCE del SDK oficial, con los permisos de identidad `openid email profile`. El botón **Continuar con Google** permite elegir una cuenta sin solicitar acceso al buzón Gmail. El proveedor se comprobó activo en Supabase el 24/11/2026 y Pages compila con `VITE_GOOGLE_ENABLED=true`; en desarrollo local la bandera sigue desactivada por defecto. La configuración, sus retornos exactos y las comprobaciones de publicación están en [docs/INGRESO_GOOGLE.md](docs/INGRESO_GOOGLE.md). El secreto OAuth se introduce directamente en Supabase, nunca en el repositorio o en una variable `VITE_`. Los usuarios nuevos conservan el alta como lectores inactivos y requieren activación administrativa.
 
 ## Seguridad y límites de verificación
 

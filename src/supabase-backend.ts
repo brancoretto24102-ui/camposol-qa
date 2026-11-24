@@ -1,4 +1,5 @@
 import {validateEvidenceInput,verifyCapture,EVIDENCE_BUCKET,type Evidence,type EvidenceInput,type EvidenceState} from './evidence-domain.ts';
+import {oauthRequest} from './oauth.ts';
 import {defaultAIPreferences,type AIPreferences,type AIGenerateInput,type AIResult} from './ai-domain.ts';
 import type {AIChatInput,AIChatResult,FreeChatStatus} from './ai-chat-domain.ts';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -48,7 +49,7 @@ export class SupabaseBackend implements Backend {
   async signUp(input:AccountInput){const {error}=await this.client.auth.signUp({email:input.email,password:input.password,options:{data:{full_name:input.full_name},emailRedirectTo:window.location.origin+window.location.pathname}});check(error);return 'Confirma tu correo y después vuelve a esta ventana para iniciar sesión. Un administrador debe activar tu acceso antes de crear o consultar proyectos.';}
   async bootstrap(_input:AccountInput):Promise<void>{throw new Error('El administrador remoto debe ser habilitado desde el backend por su propietario.');}
   async logout(){const {error}=await this.client.auth.signOut();check(error);this.current=null;}
-  async oauth(provider:'azure'|'google'){const {error}=await this.client.auth.signInWithOAuth({provider,options:{scopes:provider==='azure'?'email':undefined,redirectTo:window.location.origin+window.location.pathname}});check(error);}
+  async oauth(provider:'azure'|'google'){const {error}=await this.client.auth.signInWithOAuth(oauthRequest(provider,window.location.href));check(error);}
   async recover(email:string){const {error}=await this.client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname+'#restablecer'});check(error);return 'Si la cuenta existe y el servicio de correo está configurado, recibirás las instrucciones para recuperar tu acceso.';}
   async reset(_token:string,password:string){const {error}=await this.client.auth.updateUser({password});check(error);await this.logout();}
   async applications(){const {data,error}=await this.client.from('applications').select('*').order('name');check(error);return data as Application[];}
