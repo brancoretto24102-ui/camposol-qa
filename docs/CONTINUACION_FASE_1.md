@@ -1,10 +1,10 @@
 # Continuar Camposol QA — Fase 1
 
-Actualizado el 23/11/2026 durante la continuación solicitada. Conservar el repositorio y el backend existentes. No iniciar Fase 2 hasta presentar y validar esta fase.
+Actualizado el 23/11/2026 durante la continuación solicitada. Conservar el repositorio y el backend existentes. El usuario solicitó después continuar con la Fase 2. Esa instrucción autoriza el avance; se conservan los pendientes manuales de esta fase. Ver `docs/CONTINUACION_FASE_2.md`.
 
 ## Publicación actual
 
-El 23/11/2026 el usuario solicitó una URL pública y después autorizó hacer público el repositorio existente para utilizar GitHub Pages. La publicación está completa; la Fase 1 sigue abierta y la Fase 2 no ha comenzado.
+El 23/11/2026 el usuario solicitó una URL pública y después autorizó hacer público el repositorio existente para utilizar GitHub Pages. La publicación está completa; la Fase 1 sigue abierta y la Fase 2 manual se implementó posteriormente por petición expresa del usuario.
 
 - URL principal: https://brancoretto24102-ui.github.io/camposol-qa/
 - Repositorio original: `brancoretto24102-ui/camposol-qa`, ahora público. No crear otro repositorio.
@@ -65,7 +65,7 @@ La revisión usó `.data/phase1-visual-fixtures/`, cuatro cuentas ficticias y se
 2. Registrar y confirmar la cuenta corporativa solicitada. La activación debe usar exclusivamente su UUID confirmado y estar respaldada por autorización del usuario. Sus correos se recuperaron del contexto autorizado; no guardarlos en el repositorio. No introducir contraseñas con herramientas visibles ni pedirlas por el chat.
 3. Completar cierre, permisos entre cuentas y recuperación en la URL pública. El ingreso de la administradora y la persistencia e historial del proyecto técnico sí se comprobaron contra Supabase real. El correo de confirmación personal ya fue recibido y validado; falta el flujo completo de recuperación. Las URL públicas de retorno ya están guardadas.
 4. Configurar Microsoft cuando se disponga de datos y permisos de Entra. Google sigue deshabilitado.
-5. Presentar y validar Fase 1 antes de comenzar Fase 2. La publicación pública de esta versión ya fue autorizada y realizada; conservar los permisos de aplicación y el backend existente.
+5. Conservar estos pendientes al revisar Fase 2, cuyo inicio fue solicitado expresamente por el usuario. Mantener los permisos de aplicación y el backend existente.
 
 No volver a crear repositorio, proyecto Supabase ni esquema. No ejecutar `database/phase1-rls-tests.sql` sobre una base con cuentas o proyectos. No ampliar CI a `contents: write` ni crear ramas de transporte. El flujo de verificación conserva `contents: read`. Solo el job de publicación de Pages obtiene `pages: write` e `id-token: write`, después de compilar y comprobar el proyecto.
 

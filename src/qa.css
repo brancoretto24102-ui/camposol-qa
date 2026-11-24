@@ -1,0 +1,38 @@
+.qa-workspace,.qa-case-content,.qa-context-grid,.qa-case-layout{min-width:0;max-width:100%}
+.qa-summary{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:4px 0 22px;color:#52665c;font-size:.88rem}
+.qa-manual{margin-left:auto;border:1px solid #d8e6dc;border-radius:20px;padding:5px 11px;background:#f1f7f3;color:#315e44}
+.qa-tabs{display:flex;gap:5px;overflow-x:auto;border-bottom:1px solid #dce7df;margin-bottom:22px;padding:0 0 3px}
+.qa-tabs button{border:0;background:transparent;color:#64766c;padding:13px 16px;font:inherit;font-size:.9rem;white-space:nowrap;cursor:pointer;border-bottom:3px solid transparent}
+.qa-tabs button.active{color:#1c6040;border-color:#2d7750;font-weight:700}.qa-tabs button:disabled{cursor:default;opacity:.55}
+.qa-context-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:20px;align-items:start}
+.qa-aside{position:sticky;top:18px;min-width:0}.qa-aside .form-panel{padding:22px}
+.qa-function,.qa-proposal,.qa-step{border:1px solid #dce7df;border-radius:12px;padding:20px;margin:20px 0;min-width:0;background:#fff}
+.qa-function legend,.qa-proposal legend,.qa-step legend{font-size:.9rem;font-weight:700;padding:0 8px;color:#285d40}
+.qa-step{border-left:3px solid #94b9a1}.qa-proposal.excluded{background:#f6f8f6}
+.qa-proposal>.checkbox{margin-bottom:16px}.qa-row-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.qa-row-actions .button{margin:0}.qa-unsaved{background:#fff5df;color:#725b26;padding:9px 14px;border-radius:8px;margin-top:-10px}
+.qa-review-box{border-top:1px solid #e2eae5;padding-top:20px;margin-top:24px}.qa-review-info{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
+.qa-review-info p{width:100%;margin:0;padding:10px 12px;border-left:3px solid #d8ac51;background:#fcf8ed;white-space:pre-wrap}
+.review-chip{display:inline-flex;align-items:center;white-space:nowrap;border-radius:20px;padding:5px 10px;font-size:.73rem;font-weight:650;background:#eef1ef;color:#56665d}
+.review-chip.aprobado{background:#e4f3e8;color:#216e3e}.review-chip.en_revision{background:#e9effa;color:#3b5890}
+.review-chip.requiere_correccion{background:#fff0db;color:#8c5b1f}.review-chip.borrador{background:#f0ede4;color:#76653c}
+.qa-case-layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;align-items:start}
+.qa-case-list{padding:18px 12px;position:sticky;top:18px;max-height:calc(100vh - 120px);overflow-y:auto}
+.qa-case-list h2{font-size:1rem;margin:2px 10px 15px}.qa-case-link{display:flex;width:100%;flex-direction:column;align-items:flex-start;gap:7px;text-align:left;border:1px solid transparent;border-radius:10px;padding:13px;margin:4px 0;background:transparent;color:#4f6256;font:inherit;cursor:pointer;overflow-wrap:anywhere}
+.qa-case-link:hover{background:#f4f8f4}.qa-case-link.active{border-color:#c8ddce;background:#edf6ef}.qa-case-link strong{font-size:.84rem;line-height:1.5}.qa-case-number{font-size:.75rem;font-weight:750;color:#2f7450;letter-spacing:.05em}
+.qa-case-navigation{display:flex;justify-content:space-between;gap:10px;margin-top:24px}.qa-case-content>.panel+.panel{margin-top:20px}
+.qa-matrix-wrap{width:100%;max-width:100%;min-width:0;overflow:auto;border:1px solid #d3dfd5;border-radius:6px;margin-top:14px;background:white}
+table.qa-matrix{table-layout:fixed;width:2200px;min-width:2200px;border-collapse:collapse;font-family:'Century Gothic',Arial,sans-serif;font-size:12px}
+.qa-matrix th,.qa-matrix td{border:1px solid #b8cdbd;padding:10px;vertical-align:top;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}
+.qa-matrix th{background:#d9e9dd;color:#173d28;text-align:center;text-transform:none;font-size:12px;letter-spacing:0;vertical-align:middle}
+.qa-matrix .qa-column-letters th{background:#f1f4f1;color:#6c7a70;padding:5px;font:11px Arial,sans-serif;font-weight:normal}
+.qa-matrix .qa-col-0{width:170px}.qa-matrix .qa-col-1{width:65px}.qa-matrix .qa-col-2{width:190px}.qa-matrix .qa-col-3{width:240px}.qa-matrix .qa-col-4{width:85px}.qa-matrix .qa-col-5{width:55px}
+.qa-matrix .qa-col-6{width:270px}.qa-matrix .qa-col-7{width:220px}.qa-matrix .qa-col-8{width:270px}.qa-matrix .qa-col-9{width:130px}.qa-matrix .qa-col-10,.qa-matrix .qa-col-11,.qa-matrix .qa-col-12{width:75px}
+.qa-matrix caption{caption-side:bottom;text-align:left;padding:20px;color:#67786c}.qa-matrix-note{margin:14px 0 0;max-width:85ch;line-height:1.7}
+.qa-catalog-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.qa-catalog-grid>.panel{margin:0;min-width:0}.qa-methodology-card .panel-title{align-items:flex-start}
+.qa-methodology-card h2{font-size:1.2rem}.qa-methodology-card .qa-row-actions{margin-top:22px}.qa-details{margin:16px 0;color:#52665a}.qa-details summary{cursor:pointer;font-weight:650;color:#2b6846;padding:8px 0}.qa-details p,.qa-details li{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}
+.qa-checks{border:1px solid #dce7df;border-radius:8px;padding:16px;min-width:0}.qa-checks legend{font-size:.86rem;padding:0 6px;font-weight:650}.qa-checks .checkbox{margin:10px 0}
+.qa-context-grid .field textarea[readonly],.qa-workspace .field input[readonly],.qa-workspace .field textarea[readonly]{background:#f6f8f6;color:#53675a}
+@media(max-width:1200px){.qa-context-grid{grid-template-columns:minmax(0,1fr)}.qa-aside{position:static}.qa-case-layout{grid-template-columns:200px minmax(0,1fr)}}
+@media(max-width:850px){.qa-case-layout{display:block}.qa-case-list{position:static;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;max-width:100%;max-height:none;margin-bottom:18px;padding:12px}.qa-case-list h2{display:none}.qa-case-link{width:180px;min-width:180px;margin:0}.qa-catalog-grid{grid-template-columns:minmax(0,1fr)}.qa-manual{margin-left:0}.qa-summary{gap:8px;font-size:.8rem}.qa-tabs button{padding:12px;font-size:.82rem}}
+@media(max-width:480px){.qa-function,.qa-proposal,.qa-step{padding:14px}.qa-row-actions{gap:5px}.qa-row-actions .button{font-size:.78rem;padding:9px 10px}.qa-case-navigation .button{font-size:.8rem;padding:10px}.qa-review-box .qa-row-actions{align-items:stretch;flex-direction:column}}

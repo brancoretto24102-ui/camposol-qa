@@ -1,14 +1,12 @@
 # Camposol QA · 0.1.0
 
-Aplicación en desarrollo de la Fase 1 del PROMPT MAESTRO V2.0: acceso, roles, proyectos, persistencia y auditoría. IA, motor DigiProy, evidencias y exportación Excel corresponden a fases posteriores.
+Aplicación con Fase 2 manual: proyectos, aplicaciones, metodología DigiProy 1.0 versionada, cartillas, funcionalidades, selección y aprobación de casos, editor de pasos, matriz e historial documental.
 
-URL pública de la Fase 1: **https://brancoretto24102-ui.github.io/camposol-qa/**. Cualquier persona puede abrir el acceso; los proyectos requieren una cuenta confirmada y activada. La cuenta existente se conserva. Detalles de publicación: [Publicación de Fase 1](docs/PUBLICACION_FASE_1.md).
+URL pública: **https://brancoretto24102-ui.github.io/camposol-qa/**. Cualquier persona puede abrir el acceso; los proyectos requieren una cuenta confirmada, activada y autorizada. Se conserva el repositorio público y el backend independiente `camposol-qa-dev`, proyecto Supabase `frhmxbdombsqubqlchkj`.
 
-Repositorio público por autorización expresa del usuario el 23/11/2026: https://github.com/brancoretto24102-ui/camposol-qa . Se conserva el backend independiente `camposol-qa-dev`, proyecto Supabase `frhmxbdombsqubqlchkj`; los proyectos anteriores no se modifican.
+**Verificación de Fase 2:** 40 pruebas locales y 44 comprobaciones RLS remotas superadas, compilación local/Supabase correcta. Las comprobaciones remotas se revirtieron sin modificar la cuenta y el proyecto existentes. Estado de publicación y revisión de interfaz: [verificación de Fase 2](docs/VERIFICACION_FASE_2.md).
 
-**Estado comprobado el 23/11/2026:** dependencias instaladas y lockfile versionado; 26 pruebas locales superadas, TypeScript correcto, builds local/Supabase y auditoría con cero vulnerabilidades. React revisado en escritorio y a 390 px con datos ficticios locales. La primera cuenta remota recibió el correo, quedó confirmada y fue activada como administradora con autorización explícita. Se comprobó el ingreso real de la administradora, creación y guardado de un proyecto ficticio, persistencia al recargar e historial remoto. La segunda cuenta, recuperación y OAuth completo siguen pendientes. La Fase 1 está abierta y la Fase 2 no ha comenzado. Ver [verificación](docs/VERIFICACION_FASE_1.md) y [continuación](docs/CONTINUACION_FASE_1.md).
-
-La actualización de código `4cfaae64d64308820f38539e52de7ac47040c6a9` pasó la [verificación de GitHub](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45246134440).
+Para utilizar la entrega y continuar el proyecto: [Continuación de Fase 2](docs/CONTINUACION_FASE_2.md). La segunda cuenta y la recuperación real de Fase 1 siguen pendientes; su registro se conserva en [Continuación de Fase 1](docs/CONTINUACION_FASE_1.md). IA, evidencias y Excel corresponden a las fases siguientes.
 
 ## Desarrollo local
 
@@ -115,7 +113,7 @@ Microsoft utiliza `signInWithOAuth`, proveedor `azure`, scope `email`. Requiere 
 
 ## Seguridad y límites de verificación
 
-26 pruebas locales y 30 comprobaciones RLS remotas previas superadas. Las pruebas remotas se revirtieron; antes del alta real había cero cuentas, perfiles y proyectos. La consulta posterior al registro confirmó 1 cuenta Auth, 1 perfil, 1 administrador de aplicación activo y 0 proyectos. Después de la prueba de persistencia hay 1 proyecto técnico ficticio, archivado en versión 2. Buckets privados y analizador de seguridad sin observaciones. No se repitió el esquema ni el script RLS.
+La Fase 1 registró 26 pruebas locales y 30 comprobaciones RLS remotas previas superadas. La Fase 2 añade las comprobaciones detalladas en su documento de verificación. Las pruebas remotas se revirtieron; antes del alta real había cero cuentas, perfiles y proyectos. La consulta posterior al registro confirmó 1 cuenta Auth, 1 perfil, 1 administrador de aplicación activo y 0 proyectos. Después de la prueba de persistencia hay 1 proyecto técnico ficticio, archivado en versión 2. Buckets privados. El aviso actual del analizador de seguridad se registra en la verificación de Fase 2. No se repitió el esquema ni el script RLS.
 
 `database/phase1-rls-tests.sql` requiere un backend de desarrollo vacío y acceso administrativo; no ejecutarlo con cuentas o proyectos existentes. Las pruebas locales crean sus propias bases temporales.
 
@@ -127,7 +125,9 @@ La revisión visual utilizó sesiones ficticias sobre una base SQLite independie
 
 | Ruta | Responsabilidad |
 | --- | --- |
-| `src/features/` | Acceso, proyectos, administración y perfil |
+| `src/features/` | Acceso, proyectos, catálogos y elaboración de cartillas |
+| `src/qa-domain.ts` | Reglas de contexto, selección, revisión, casos y matriz |
+| `supabase/migrations/` | Ampliaciones aditivas de Fase 2 ya aplicadas |
 | `src/domain.ts` | Entidades y validaciones comunes |
 | `src/backend.ts` | Contrato y adaptador HTTP local |
 | `src/supabase-backend.ts` | Adaptador Auth y PostgreSQL |
@@ -136,6 +136,6 @@ La revisión visual utilizó sesiones ficticias sobre una base SQLite independie
 | `tests/` | Permisos, API, persistencia y validaciones |
 | `docs/` | Arquitectura y estado comprobado |
 
-## Pendiente para cerrar la fase
+## Pendientes manuales de Fase 1
 
-Registro, confirmación y activación autorizada de la segunda cuenta; cierre y recuperación en la URL pública; completar comprobaciones con los roles reales; Microsoft cuando existan credenciales y permisos Entra. La interfaz de Fase 1 ya fue publicada con autorización expresa. La Fase 2 no ha comenzado.
+Registro, confirmación y activación autorizada de la segunda cuenta; cierre y recuperación en la URL pública; completar comprobaciones con los roles reales; Microsoft cuando existan credenciales y permisos Entra. La interfaz de Fase 1 ya fue publicada con autorización expresa. La Fase 2 manual se implementó por petición expresa del usuario; véase su documento de continuación.

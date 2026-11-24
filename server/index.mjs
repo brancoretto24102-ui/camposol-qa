@@ -4,6 +4,7 @@ import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { resolve, extname, join, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Store, AppError } from './store.mjs';
+import { QAError } from '../src/qa-domain.ts';
 
 const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.ico':'image/x-icon'};
@@ -11,7 +12,7 @@ const equal=(a,b)=>typeof a==='string'&&typeof b==='string'&&Buffer.byteLength(a
 export function createApp({store=new Store(resolve(root,process.env.QA_DATA_DIR??'.data','camposol-qa.sqlite')),dataDir=resolve(root,process.env.QA_DATA_DIR??'.data'),allowedOrigins=['http://127.0.0.1:5173','http://localhost:5173','http://127.0.0.1:4317','http://localhost:4317']}={}) {
   const attempts=new Map();
   function send(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(data));}
-  async function body(req){let raw='';for await(const chunk of req){raw+=chunk; if(Buffer.byteLength(raw)>40_000)throw new AppError(413,'La solicitud es demasiado grande.');}try{const v=JSON.parse(raw||'{}');if(v===null||Array.isArray(v)||typeof v!=='object')throw 0;return v;}catch{throw new AppError(400,'La solicitud no contiene un objeto JSON válido.');}}
+  async function body(req,maximum=40_000){let raw='';for await(const chunk of req){raw+=chunk; if(Buffer.byteLength(raw)>maximum)throw new AppError(413,'La solicitud es demasiado grande.');}try{const v=JSON.parse(raw||'{}');if(v===null||Array.isArray(v)||typeof v!=='object')throw 0;return v;}catch{throw new AppError(400,'La solicitud no contiene un objeto JSON válido.');}}
   function throttle(req,key){const now=Date.now();for(const [k,v] of attempts)if(v.end<now)attempts.delete(k);const k=`${req.socket.remoteAddress}:${key}`;const entry=attempts.get(k)??{n:0,end:now+60_000};entry.n++;attempts.set(k,entry);if(entry.n>8)throw new AppError(429,'Demasiados intentos. Espera un minuto antes de volver a intentar.');}
   return createServer(async(req,res)=>{
     res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','no-referrer');res.setHeader('Cache-Control','no-store');res.setHeader('Cross-Origin-Resource-Policy','same-origin');
@@ -29,7 +30,7 @@ export function createApp({store=new Store(resolve(root,process.env.QA_DATA_DIR?
       const mutate=!['GET','HEAD'].includes(req.method);
       if(mutate){if(!allowedOrigins.includes(req.headers.origin))throw new AppError(403,'Origen no autorizado.');if(!req.headers['content-type']?.startsWith('application/json'))throw new AppError(415,'Se requiere contenido JSON.');}
       if(path==='/api/info'&&req.method==='GET')return send(res,200,store.info());
-      if(path==='/api/health'&&req.method==='GET')return send(res,200,{ok:true,mode:'local',phase:1});
+      if(path==='/api/health'&&req.method==='GET')return send(res,200,{ok:true,mode:'local',phase:2});
       const cookie=(req.headers.cookie??'').split(';').map(x=>x.trim()).find(x=>x.startsWith('qa_session='))?.slice(11);
       const auth=store.session(cookie);
       if(path==='/api/session'&&req.method==='GET')return send(res,200,auth??{user:null,csrf:''});
@@ -44,6 +45,20 @@ export function createApp({store=new Store(resolve(root,process.env.QA_DATA_DIR?
       const user=auth.user;
       if(path==='/api/logout'&&req.method==='POST'){store.logout(cookie);res.setHeader('Set-Cookie','qa_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');return send(res,200,{ok:true});}
       if(path==='/api/applications'&&req.method==='GET')return send(res,200,store.applications(user));
+      if(path==='/api/applications'&&req.method==='PUT')return send(res,200,store.qa.saveApplication(user,await body(req)));
+      if(path==='/api/qa/methodologies'&&req.method==='GET')return send(res,200,store.qa.methodologies(user));
+      if(path==='/api/qa/methodologies'&&req.method==='POST'){const input=await body(req);return send(res,200,store.qa.saveMethodology(user,input.methodology,input.id??null,input.revision??0));}
+      const publish=path.match(/^\/api\/qa\/methodologies\/([a-f0-9-]{36})\/approve$/);
+      if(publish&&req.method==='POST'){const input=await body(req);return send(res,200,store.qa.approveMethodology(user,publish[1],input.revision));}
+      if(path==='/api/qa/progress'&&req.method==='GET')return send(res,200,store.qa.progress(user));
+      const qa=path.match(/^\/api\/qa\/projects\/([a-f0-9-]{36})$/);
+      if(qa&&req.method==='GET')return send(res,200,store.qa.get(user,qa[1]));
+      if(qa&&req.method==='POST'){const input=await body(req,2_100_000);return send(res,200,store.qa.command(user,qa[1],input.version,input.command));}
+      const qaHistory=path.match(/^\/api\/qa\/projects\/([a-f0-9-]{36})\/history$/);
+      if(qaHistory&&req.method==='GET')return send(res,200,store.qa.history(user,qaHistory[1],Number(url.searchParams.get('offset')??0)));
+      const qaRevision=path.match(/^\/api\/qa\/projects\/([a-f0-9-]{36})\/history\/(\d+)$/);
+      if(qaRevision&&req.method==='GET')return send(res,200,store.qa.revision(user,qaRevision[1],Number(qaRevision[2])));
+
       if(path==='/api/profile'&&req.method==='PATCH')return send(res,200,store.updateProfile(user,await body(req)));
       if(path==='/api/projects'&&req.method==='GET')return send(res,200,store.listProjects(user));
       if(path==='/api/projects'&&req.method==='POST')return send(res,201,store.createProject(user,await body(req)));
@@ -61,7 +76,7 @@ export function createApp({store=new Store(resolve(root,process.env.QA_DATA_DIR?
       if(account&&req.method==='PATCH')return send(res,200,store.updateUser(user,account[1],await body(req)));
       if(path==='/api/audit'&&req.method==='GET')return send(res,200,store.events(user,url.searchParams.get('project_id')));
       throw new AppError(404,'Recurso no encontrado.');
-    }catch(error){const status=error instanceof AppError?error.status:500;if(status===500)console.error('Error interno de Camposol QA:',error.name);send(res,status,{error:status===500?'Ocurrió un error interno. Intenta nuevamente.':error.message});}
+    }catch(error){const status=error instanceof AppError||error instanceof QAError?error.status:500;if(status===500)console.error('Error interno de Camposol QA:',error.name);send(res,status,{error:status===500?'Ocurrió un error interno. Intenta nuevamente.':error.message});}
   });
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){

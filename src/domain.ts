@@ -1,7 +1,7 @@
 export type Role = 'administrador' | 'editor' | 'revisor' | 'lector';
 export type ProjectStatus = 'borrador' | 'en_preparacion' | 'archivado';
 export interface Profile { id: string; email: string; full_name: string; role: Role; active: boolean; can_self_approve: boolean }
-export interface Application { id: string; name: string; active: boolean }
+export interface Application { id: string; name: string; active: boolean; version:number }
 export interface Project { id: string; owner_id: string; application_id: string; application_name: string; code: string; name: string; objective: string; description: string; status: ProjectStatus; version: number; created_at: string; updated_at: string; can_edit: boolean }
 export interface ProjectInput { application_id: string; code: string; name: string; objective: string; description: string; status: ProjectStatus }
 export interface Member { user_id: string; full_name: string; role: Role }

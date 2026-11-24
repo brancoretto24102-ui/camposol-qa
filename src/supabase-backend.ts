@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Backend, BackendInfo, AccountInput } from './backend.ts';
 import type { Application, AuditEvent, Member, Profile, Project, ProjectInput, Role } from './domain.ts';
+import type { MethodologyInput, MethodologyVersion, QACommand, QADocument, QAProgress, QARevision } from './qa-domain.ts';
 const authMessages:Record<string,string>={
   invalid_credentials:'Correo o contraseña incorrectos.',
   email_not_confirmed:'Confirma tu correo antes de iniciar sesión.',
@@ -31,7 +32,23 @@ export class SupabaseBackend implements Backend {
   async oauth(provider:'azure'|'google'){const {error}=await this.client.auth.signInWithOAuth({provider,options:{scopes:provider==='azure'?'email':undefined,redirectTo:window.location.origin+window.location.pathname}});check(error);}
   async recover(email:string){const {error}=await this.client.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname+'#restablecer'});check(error);return 'Si la cuenta existe y el servicio de correo está configurado, recibirás las instrucciones para recuperar tu acceso.';}
   async reset(_token:string,password:string){const {error}=await this.client.auth.updateUser({password});check(error);await this.logout();}
-  async applications(){const {data,error}=await this.client.from('applications').select('*').eq('active',true).order('name');check(error);return data as Application[];}
+  async applications(){const {data,error}=await this.client.from('applications').select('*').order('name');check(error);return data as Application[];}
+  private async allRows<T>(table:string,sort:string,key:string):Promise<T[]>{
+    const rows:T[]=[];
+    for(let start=0;;start+=500){
+      const {data,error}=await this.client.from(table).select('*').order(sort).order(key).range(start,start+499);
+      check(error);rows.push(...(data??[]) as unknown as T[]);if(!data||data.length<500)return rows;
+    }
+  }
+  async saveApplication(input:Application){const {data,error}=await this.client.rpc('qa_application_save',{input});check(error);return data as Application;}
+  methodologies(){return this.allRows<MethodologyVersion>('qa_methodology_versions','name','id');}
+  async saveMethodology(input:MethodologyInput,previous?:MethodologyVersion){const {data,error}=await this.client.rpc('qa_methodology_save',{input,target:previous?.id??null,expected_revision:previous?.revision??0});check(error);return data as MethodologyVersion;}
+  async approveMethodology(previous:MethodologyVersion){const {data,error}=await this.client.rpc('qa_methodology_approve',{target:previous.id,expected_revision:previous.revision});check(error);return data as MethodologyVersion;}
+  async qaDocument(id:string){const {data,error}=await this.client.from('qa_documents').select('*').eq('project_id',id).maybeSingle();check(error);return data as QADocument|null;}
+  async qaCommand(id:string,version:number,command:QACommand){const {data,error}=await this.client.rpc('qa_command',{target:id,expected_version:version,command});check(error);return data as QADocument;}
+  qaProgress(){return this.allRows<QAProgress>('qa_progress','updated_at','project_id');}
+  async qaHistory(id:string,offset=0){const {data,error}=await this.client.from('qa_document_revisions').select('project_id,version,action,actor_id,actor_name,created_at').eq('project_id',id).order('version',{ascending:false}).range(offset,offset+19);check(error);return (data??[]) as QARevision[];}
+  async qaRevision(id:string,version:number){const {data,error}=await this.client.from('qa_document_revisions').select('snapshot').eq('project_id',id).eq('version',version).single();check(error);if(!data)throw new Error('La versión no está disponible.');return data.snapshot as QADocument;}
   private async mapProjects(rows:Record<string,unknown>[]):Promise<Project[]>{const profile=this.current??await this.session();if(!profile)return [];const {data:members,error}=await this.client.from('project_members').select('project_id,role').eq('user_id',profile.id);check(error);return rows.map(row=>({...row,application_name:(row.applications as {name:string}|null)?.name??'',can_edit:profile.active&&(profile.role==='administrador'||(profile.role==='editor'&&(row.owner_id===profile.id||members?.some(m=>m.project_id===row.id&&m.role==='editor'))))}) as unknown as Project);}
   async projects(){const {data,error}=await this.client.from('projects').select('*,applications(name)').order('updated_at',{ascending:false});check(error);return this.mapProjects(data??[]);}
   async project(id:string){const {data,error}=await this.client.from('projects').select('*,applications(name)').eq('id',id).single();check(error);return (await this.mapProjects([data]))[0];}

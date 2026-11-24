@@ -1,4 +1,5 @@
 import type { Application, AuditEvent, Member, Profile, Project, ProjectInput, Role } from './domain.ts';
+import type { MethodologyInput, MethodologyVersion, QACommand, QADocument, QAProgress, QARevision } from './qa-domain.ts';
 export interface BackendInfo { mode:'local'|'supabase'; bootstrap_required:boolean; microsoft_enabled:boolean; google_enabled:boolean }
 export interface AccountInput { full_name:string; email:string; password:string; role?:Role }
 export interface Backend {
@@ -12,6 +13,15 @@ export interface Backend {
   updateUser(user:Profile):Promise<void>; updateProfile(full_name:string):Promise<Profile>;
   members(projectId:string):Promise<Member[]>; setMember(projectId:string,user_id:string,role:Role):Promise<void>;
   removeMember(projectId:string,userId:string):Promise<void>; audit(projectId?:string):Promise<AuditEvent[]>;
+  saveApplication(input:Application):Promise<Application>;
+  methodologies():Promise<MethodologyVersion[]>;
+  saveMethodology(input:MethodologyInput,previous?:MethodologyVersion):Promise<MethodologyVersion>;
+  approveMethodology(previous:MethodologyVersion):Promise<MethodologyVersion>;
+  qaDocument(projectId:string):Promise<QADocument|null>;
+  qaCommand(projectId:string,version:number,command:QACommand):Promise<QADocument>;
+  qaProgress():Promise<QAProgress[]>;
+  qaHistory(projectId:string,offset?:number):Promise<QARevision[]>;
+  qaRevision(projectId:string,version:number):Promise<QADocument>;
 }
 export class LocalBackend implements Backend {
   private csrf='';
@@ -40,6 +50,15 @@ export class LocalBackend implements Backend {
   async setMember(id:string,user_id:string,role:Role){await this.request(`/projects/${id}/members`,'PUT',{user_id,role});}
   async removeMember(id:string,userId:string){await this.request(`/projects/${id}/members/${userId}`,'DELETE',{});}
   audit(id?:string){return this.request<AuditEvent[]>(`/audit${id?`?project_id=${encodeURIComponent(id)}`:''}`);}
+  saveApplication(input:Application){return this.request<Application>('/applications','PUT',input);}
+  methodologies(){return this.request<MethodologyVersion[]>('/qa/methodologies');}
+  saveMethodology(input:MethodologyInput,previous?:MethodologyVersion){return this.request<MethodologyVersion>('/qa/methodologies','POST',{methodology:input,id:previous?.id,revision:previous?.revision??0});}
+  approveMethodology(previous:MethodologyVersion){return this.request<MethodologyVersion>(`/qa/methodologies/${previous.id}/approve`,'POST',{revision:previous.revision});}
+  qaDocument(id:string){return this.request<QADocument|null>(`/qa/projects/${id}`);}
+  qaCommand(id:string,version:number,command:QACommand){return this.request<QADocument>(`/qa/projects/${id}`,'POST',{version,command});}
+  qaProgress(){return this.request<QAProgress[]>('/qa/progress');}
+  qaHistory(id:string,offset=0){return this.request<QARevision[]>(`/qa/projects/${id}/history?offset=${offset}`);}
+  qaRevision(id:string,version:number){return this.request<QADocument>(`/qa/projects/${id}/history/${version}`);}
 }
 export async function createBackend():Promise<Backend>{
   if(import.meta.env.VITE_BACKEND==='supabase'){const { SupabaseBackend }=await import('./supabase-backend.ts');return new SupabaseBackend();}
