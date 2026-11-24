@@ -79,6 +79,8 @@ Las compilaciones incluyen TypeScript del frontend y del intermediario mediante 
 
 Código publicado `d776947a593c21ff20751bf1e340a9e240b3e0f6`; ambos flujos de GitHub terminaron correctamente. La revisión se realizó en la URL pública con la sesión existente y respuestas controladas. La cartilla técnica quedó archivada y se restauró Ninguna IA. Resultados de pruebas, revisión visual y publicación: [VERIFICACION_FASE_3.md](VERIFICACION_FASE_3.md). Los pendientes de acceso de Fase 1 siguen documentados: segunda cuenta, recuperación real y OAuth autorizado. No se modificó SMTP ni se elevaron permisos.
 
+Corrección posterior del flujo y errores API publicada el 24/11/2026: `ffd51725c993f7c83314f348eeabc4e5d772b49d`, con `qa-ai` versión 3. Las 73 pruebas, las dos compilaciones y los flujos de verificación y Pages terminaron correctamente. Se comprobó HTTP 200 y la presencia del nuevo estado de error en el JavaScript servido por la URL pública. Esto no resuelve por sí mismo saldo o límites de la cuenta del proveedor; el siguiente intento debe atender el aviso específico de la API. No se realizaron generaciones pagadas durante la corrección.
+
 El aviso previo de contraseñas filtradas deshabilitadas permanece: [referencia oficial](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). La política explícita de contadores eliminó la nueva observación informativa de RLS sin política.
 
 Fase 4 corresponde a archivos, capturas y evidencias. No se implementan aún la subida de documentos, análisis de imágenes, Hoja de Control ni exportación Excel. No publicar el libro empresarial original.
