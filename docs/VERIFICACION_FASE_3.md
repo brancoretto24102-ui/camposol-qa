@@ -48,3 +48,9 @@ Se dejó abierta para revisión https://brancoretto24102-ui.github.io/camposol-q
 ## Límites conservados
 
 No se introdujeron claves reales ni se generaron cargos. La API de Microsoft 365 Copilot queda pendiente de licencia y autorización organizacional. La comprobación de una cita textual no valida automáticamente la semántica de un requisito o cálculo; la revisión humana sigue siendo obligatoria. La consulta sin aplicar es temporal. No hay adjuntos, visión, evidencias ni exportación Excel en Fase 3. Los pendientes manuales de acceso de Fase 1 no se consideran resueltos por estas pruebas.
+
+## Corrección del flujo API — 24/11/2026
+
+La interfaz mostraba el encabezado manual «Pega y valida la respuesta» también después de seleccionar API. La llamada API ya recibía y validaba la respuesta de forma automática; se corrigió su presentación para mostrar «Generar con IA» y «Revisa la propuesta» en la misma página. El formulario de pegar respuestas corresponde a la modalidad manual. En API, el detalle JSON es opcional y se abre si se necesita corregir una respuesta recibida. Cambiar de proveedor o modalidad descarta la consulta temporal anterior.
+
+Se repitieron las 66 pruebas existentes: todas superadas, sin omisiones. Las compilaciones local y Supabase, incluidos los chequeos TypeScript, terminaron correctamente. No se añadieron dependencias ni se modificó el backend, sus migraciones o los permisos. No se realizó una generación pagada con credenciales reales durante esta corrección.

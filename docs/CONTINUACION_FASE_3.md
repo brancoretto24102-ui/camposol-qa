@@ -32,6 +32,8 @@ El análisis conserva funcionalidades existentes y sus identificadores, y agrega
 
 Las conexiones utilizan APIs oficiales y endpoints fijos; no permiten URLs arbitrarias ni herramientas externas. El usuario indica un modelo compatible habilitado en su cuenta, revisa las tarifas y autoriza cada envío. Una suscripción al chatbot no garantiza acceso ni saldo API.
 
+En modalidad API, «Generar con IA» envía la consulta y recibe y valida la respuesta dentro de Camposol QA. La propuesta editable aparece directamente en la misma página para su revisión humana y aplicación como borrador. El paso «Pega y valida la respuesta» corresponde solo a la modalidad manual. El JSON de una respuesta API queda en un detalle opcional, que se abre si necesita corregirse; no se requiere abrir el chatbot ni copiar una respuesta para utilizar la API. Cambiar de proveedor o modalidad descarta la consulta temporal anterior para evitar mezclar sus respuestas.
+
 | Proveedor | Transporte implementado | Conexión |
 | --- | --- | --- |
 | ChatGPT / OpenAI | Responses, JSON, `store:false` | API propia opcional |
