@@ -1,6 +1,31 @@
 import {AI_OUTPUT_TOKENS,AI_RESPONSE_LIMIT,type AIGenerateInput,type AIResult} from '../../../src/ai-domain.ts';
 import {QAError} from '../../../src/qa-domain.ts';
 
+// Inspect only bounded error codes. Never return the provider's raw error
+// message: it may include credentials, prompts, or private account details.
+async function openAIQuotaError(response:Response):Promise<QAError>{
+  let code='',type='';
+  const reader=response.body?.getReader();
+  if(reader)try{
+    const chunks:Uint8Array[]=[];let size=0;
+    for(;;){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>16_384){await reader.cancel();return new QAError(429,'OpenAI rechazó la consulta por un límite de uso, saldo o cuota (429). Revisa los límites y la facturación de tu cuenta API.');}chunks.push(value);}
+    const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
+    const data=JSON.parse(new TextDecoder().decode(bytes));code=typeof data?.error?.code==='string'?data.error.code:'';type=typeof data?.error?.type==='string'?data.error.type:'';
+  }catch{/* A malformed or interrupted error body keeps the safe fallback. */}
+  finally{reader.releaseLock();}
+  const messages:Record<string,string>={
+    credit_balance_exhausted:'OpenAI indica que el saldo de créditos API está agotado. Revisa la facturación de tu cuenta API antes de volver a enviar la consulta.',
+    organization_spend_limit_exceeded:'OpenAI indica que se alcanzó el límite de gasto de la organización. Revisa ese límite con quien administra tu cuenta API antes de volver a intentar.',
+    project_spend_limit_exceeded:'OpenAI indica que se alcanzó el límite de gasto del proyecto API. Revisa la configuración de ese proyecto antes de volver a intentar.',
+    organization_usage_limit_exceeded:'OpenAI indica que se alcanzó el límite de uso asignado a la organización. Revisa los límites de tu cuenta API antes de volver a intentar.',
+    rate_limit_exceeded:'OpenAI limitó temporalmente las solicitudes o los tokens. Espera antes de volver a intentar y revisa los límites del modelo en tu cuenta API.',
+    slow_down:'OpenAI pidió reducir la frecuencia de solicitudes. Espera antes de volver a enviar la consulta.',
+    insufficient_quota:'OpenAI indica que no hay cuota API disponible. Revisa el saldo y los límites de gasto o uso de tu cuenta API. Reintentar sin resolverlo no restablece el acceso.',
+  };
+  const known=Object.hasOwn(messages,code)?messages[code]:type==='insufficient_quota'?messages.insufficient_quota:null;
+  return new QAError(429,known??'OpenAI rechazó la consulta por un límite de uso, saldo o cuota (429). Revisa los límites y la facturación de tu cuenta API.');
+}
+
 // Only server entrypoints import this transport. Keys are never added to URLs,
 // returned values, prompts, logs, retries, or persistent storage.
 export async function callAIProvider(input:AIGenerateInput,fetcher:typeof fetch=fetch):Promise<AIResult>{
@@ -19,7 +44,7 @@ export async function callAIProvider(input:AIGenerateInput,fetcher:typeof fetch=
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),50_000);
   try{
     const response=await fetcher(url,{method:'POST',headers,body:JSON.stringify(body),redirect:'error',signal:controller.signal});
-    if(!response.ok){await response.body?.cancel();
+    if(!response.ok){if(provider==='openai'&&response.status===429)throw await openAIQuotaError(response);await response.body?.cancel();
       if(response.status===401||response.status===403)throw new QAError(422,'El proveedor no autorizó la clave, el modelo o su ámbito. Comprueba tu cuenta API.');
       if(response.status===429)throw new QAError(429,'El proveedor alcanzó su límite de uso o cuota. Revisa tu cuenta antes de volver a intentar.');
       throw new QAError(502,'El proveedor no pudo completar la solicitud. Comprueba el modelo, su compatibilidad JSON y tu cuota. No se reintentó automáticamente.');

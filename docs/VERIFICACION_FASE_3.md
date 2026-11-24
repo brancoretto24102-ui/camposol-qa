@@ -54,3 +54,15 @@ No se introdujeron claves reales ni se generaron cargos. La API de Microsoft 365
 La interfaz mostraba el encabezado manual «Pega y valida la respuesta» también después de seleccionar API. La llamada API ya recibía y validaba la respuesta de forma automática; se corrigió su presentación para mostrar «Generar con IA» y «Revisa la propuesta» en la misma página. El formulario de pegar respuestas corresponde a la modalidad manual. En API, el detalle JSON es opcional y se abre si se necesita corregir una respuesta recibida. Cambiar de proveedor o modalidad descarta la consulta temporal anterior.
 
 Se repitieron las 66 pruebas existentes: todas superadas, sin omisiones. Las compilaciones local y Supabase, incluidos los chequeos TypeScript, terminaron correctamente. No se añadieron dependencias ni se modificó el backend, sus migraciones o los permisos. No se realizó una generación pagada con credenciales reales durante esta corrección.
+
+## Corrección de errores de generación API — 24/11/2026
+
+Una solicitud fallida dejaba el aviso de error al principio del asistente y restauraba la invitación inicial junto al resultado. Se agregaron estados explícitos y un aviso local de fallo que conserva el prompt y permanece visible hasta una nueva consulta o descarte. Las respuestas recibidas con errores de validación mantienen el detalle corregible en la misma sección.
+
+El intermediario ahora clasifica códigos oficiales 429 de OpenAI para distinguir saldo, gasto, uso y frecuencia. Se limita la lectura de error a 16 KB y se presentan textos propios; nunca el mensaje original del proveedor, la clave ni datos de la cuenta. Se conserva el aviso genérico si el cuerpo no es interpretable o el código es desconocido. No se modificaron cuotas ni se añadieron reintentos.
+
+- **73 pruebas superadas**, sin fallos ni omisiones: las 66 anteriores, cuatro comprobaciones de presentación del estado y tres pruebas de clasificación, lectura acotada, ausencia de secretos y propagación del error mediante el intermediario.
+- Compilaciones local y Supabase correctas, con ambos chequeos TypeScript. Sin nuevas dependencias.
+- Edge Function `qa-ai` versión 3 desplegada en el backend existente, ACTIVE y JWT obligatorio. Huella del artefacto: `5f1c86cc2d88cc7e0361e2fa573c45d7f7afd2095f1ca2e6bea0e52df69febc8`.
+- La revisión de la interfaz existente fue de lectura: se comprobó el aviso genérico de límite o cuota. No se reenviaron consultas, no se leyeron claves ni se alteró el formulario abierto.
+- La clasificación específica de los códigos se verificó con transporte controlado. No se consultó la facturación privada ni se realizó una generación pagada. El motivo exacto de un rechazo anterior con aviso genérico no puede determinarse solo por su estado 429; revisar la indicación específica en un siguiente intento autorizado o la cuenta API.

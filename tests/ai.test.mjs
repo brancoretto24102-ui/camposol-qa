@@ -112,6 +112,38 @@ test('errores del proveedor no reflejan cuerpos o secretos ni disparan reintento
   const f=await fixture(t);f.prepare();for(const status of [401,403,429,500]){let calls=0;const input=f.request(),key=input.api_key;await assert.rejects(callAIProvider(input,async()=>{calls++;return new Response(key,{status});}),e=>!e.message.includes(key));assert.equal(calls,1);assert.equal(input.api_key,'');}
   const input=f.request(),key=input.api_key;await assert.rejects(callAIProvider(input,async()=>{throw new Error(key);}),e=>!e.message.includes(key));assert.equal(input.api_key,'');
 });
+test('OpenAI distingue saldo, gasto, uso y frecuencia sin devolver datos privados del error',async t=>{
+  const f=await fixture(t);f.prepare();
+  for(const [code,expected] of [
+    ['credit_balance_exhausted',/saldo de créditos API está agotado/],
+    ['organization_spend_limit_exceeded',/límite de gasto de la organización/],
+    ['project_spend_limit_exceeded',/límite de gasto del proyecto/],
+    ['organization_usage_limit_exceeded',/límite de uso asignado/],
+    ['rate_limit_exceeded',/limitó temporalmente/],
+    ['slow_down',/reducir la frecuencia/],
+    ['insufficient_quota',/no hay cuota API disponible/],
+  ]){
+    const input=f.request(),key=input.api_key;let calls=0;
+    await assert.rejects(callAIProvider(input,async()=>{calls++;return Response.json({error:{code,type:'insufficient_quota',message:key,account:key}},{status:429});}),error=>error.status===429&&expected.test(error.message)&&!error.message.includes(key));
+    assert.equal(calls,1);assert.equal(input.api_key,'');
+  }
+});
+test('un código de cuota desconocido, heredado o un cuerpo grande usa un mensaje acotado y seguro',async t=>{
+  const f=await fixture(t);f.prepare();
+  for(const code of ['codigo_nuevo','__proto__','toString']){
+    const input=f.request(),key=input.api_key;
+    await assert.rejects(callAIProvider(input,async()=>Response.json({error:{code,message:key}},{status:429})),error=>error.status===429&&/\(429\)/.test(error.message)&&!error.message.includes(key));
+    assert.equal(input.api_key,'');
+  }
+  const input=f.request(),key=input.api_key;
+  await assert.rejects(callAIProvider(input,async()=>new Response(key.repeat(1000),{status:429})),error=>error.status===429&&/\(429\)/.test(error.message)&&!error.message.includes(key));assert.equal(input.api_key,'');
+});
+test('el tipo insufficient_quota se reconoce sin código y el intermediario conserva el aviso seguro',async t=>{
+  const f=await fixture(t);f.prepare();const input=f.request(),key=input.api_key;
+  const handler=createAIHandler({authenticate:async()=>({}),load:async()=>f.context(),reserve:async()=>{},call:request=>callAIProvider(request,async()=>Response.json({error:{type:'insufficient_quota',message:key}},{status:429}))});
+  const response=await handler(new Request('https://example.test/qa-ai',{method:'POST',headers:{Origin:'https://brancoretto24102-ui.github.io',Authorization:'Bearer fake.jwt.test','Content-Type':'application/json'},body:JSON.stringify(input)}));
+  assert.equal(response.status,429);const body=await response.json();assert.match(body.error,/no hay cuota API disponible/);assert.equal(JSON.stringify(body).includes(key),false);
+});
 test('rechaza truncamiento, rechazo, JSON inválido y respuestas excesivas del proveedor',async t=>{
   const f=await fixture(t);f.prepare();for(const response of [Response.json({status:'incomplete',output:[]}),Response.json({status:'completed',output:[{type:'message',content:[{type:'refusal',refusal:'No'}]}]}),new Response('invalid-json'),new Response('x'.repeat(1_000_001))])await assert.rejects(callAIProvider(f.request(),async()=>response));
 });

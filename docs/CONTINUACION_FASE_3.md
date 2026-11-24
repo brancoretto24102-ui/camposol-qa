@@ -34,6 +34,10 @@ Las conexiones utilizan APIs oficiales y endpoints fijos; no permiten URLs arbit
 
 En modalidad API, «Generar con IA» envía la consulta y recibe y valida la respuesta dentro de Camposol QA. La propuesta editable aparece directamente en la misma página para su revisión humana y aplicación como borrador. El paso «Pega y valida la respuesta» corresponde solo a la modalidad manual. El JSON de una respuesta API queda en un detalle opcional, que se abre si necesita corregirse; no se requiere abrir el chatbot ni copiar una respuesta para utilizar la API. Cambiar de proveedor o modalidad descarta la consulta temporal anterior para evitar mezclar sus respuestas.
 
+La consulta API mantiene estados explícitos: sin iniciar, enviando, respuesta recibida y envío fallido. Un fallo se muestra junto al resultado y conserva el texto del prompt; no vuelve a invitar a generar como si no hubiera ocurrido nada. Los errores de validación de una respuesta recibida se muestran en esa misma sección, junto al detalle corregible.
+
+Los errores 429 de OpenAI se clasifican por códigos oficiales: saldo de créditos agotado, límite de gasto de organización o proyecto, límite de uso, cuota insuficiente y frecuencia temporal. Solo se examinan hasta 16 KB del cuerpo de error. Nunca se devuelve ni registra el mensaje original, la clave, los detalles de la cuenta o el prompt. Los códigos desconocidos mantienen un aviso genérico y no disparan reintentos. Un error 429 por sí solo no demuestra falta de saldo: también puede corresponder a un límite temporal. Revisar [los errores de OpenAI](https://developers.openai.com/api/docs/guides/error-codes) y [la guía de resolución de 429](https://help.openai.com/es-419/articles/5955604-troubleshooting-api-rate-limits-and-429-errors).
+
 | Proveedor | Transporte implementado | Conexión |
 | --- | --- | --- |
 | ChatGPT / OpenAI | Responses, JSON, `store:false` | API propia opcional |
@@ -58,7 +62,7 @@ La futura integración directa debe implementar un adaptador separado para Micro
 - `public.ai_provider_preferences`: lectura propia con RLS y escritura mediante comando versionado. Ni un administrador puede leer las preferencias de otra persona por la API de la aplicación.
 - `private.qa_ai_usage`: contadores por cuenta; sin acceso cliente y con política explícita de denegación.
 - `qa_ai_reserve`: verifica edición efectiva, perfil activo, proyecto, archivo, versión y aprobación de etapas antes de reservar una solicitud.
-- Edge Function `qa-ai`, versión 2, estado ACTIVE y `verify_jwt:true`. Verifica además el token con Auth y usa el JWT del usuario para RLS. No utiliza una clave privilegiada para consultar proyectos.
+- Edge Function `qa-ai`, versión 3, estado ACTIVE y `verify_jwt:true`. Verifica además el token con Auth y usa el JWT del usuario para RLS. No utiliza una clave privilegiada para consultar proyectos. La versión 3 agrega la clasificación segura de errores 429 sin modificar la autenticación ni las cuotas.
 - CORS del manejador restringido a GitHub Pages, la publicación anterior autorizada y los retornos locales. La plataforma rechaza las llamadas sin JWT antes de ejecutar el manejador.
 - Las propuestas se guardan mediante los comandos documentales existentes, sin una vía alternativa de aprobación.
 

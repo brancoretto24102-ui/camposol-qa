@@ -6,6 +6,7 @@ import {aiProviders,aiTasks,defaultAIPreferences,validateAIPreferences,buildAIPr
 import {Alert,Button,PageTitle} from '../ui.ts';
 import {message} from '../forms.ts';
 import {QAField} from './qa-common.ts';
+import {AIRequestFeedback,type AIRequestState} from './ai-feedback.ts';
 
 function ProviderLinks({provider}:{provider:AIProvider}){const p=aiProviders[provider];return provider==='none'?null:h('div',{className:'ai-links'},
   h('a',{href:p.docs,target:'_blank',rel:'noopener noreferrer'},'Documentación oficial'),p.pricing&&h('a',{href:p.pricing,target:'_blank',rel:'noopener noreferrer'},'Tarifas y límites'),
@@ -50,24 +51,25 @@ function ProposalEditor({proposal,onChange,functionalities}:{proposal:AIProposal
 export function AIAssistant({backend,context,initialTask,caseId,run}:{backend:Backend;context:AIContext;initialTask:AITask;caseId?:string;run:(command:QACommand)=>Promise<QADocument>}){
   const [prefs,setPrefs]=useState<AIPreferences>({...defaultAIPreferences}),[loading,setLoading]=useState(true),[task,setTask]=useState<AITask>(initialTask),[selectedCase,setSelectedCase]=useState(caseId??''),
     [prepared,setPrepared]=useState<{context:AIContext;target:AITarget}|null>(null),[prompt,setPrompt]=useState(''),[raw,setRaw]=useState(''),[proposal,setProposal]=useState<AIProposal|null>(null),[consent,setConsent]=useState(false),[reviewed,setReviewed]=useState(false),[apiKey,setApiKey]=useState(''),
-    [find,setFind]=useState(''),[replacement,setReplacement]=useState('[DATO OMITIDO]'),[error,setError]=useState(''),[success,setSuccess]=useState(''),[busy,setBusy]=useState(false);
+    [find,setFind]=useState(''),[replacement,setReplacement]=useState('[DATO OMITIDO]'),[error,setError]=useState(''),[success,setSuccess]=useState(''),[busy,setBusy]=useState(false),[apiState,setApiState]=useState<AIRequestState>('idle'),[apiError,setApiError]=useState('');
   useEffect(()=>{void backend.aiPreferences().then(setPrefs).catch(e=>setError(message(e))).finally(()=>setLoading(false));},[]);
   const provider=aiProviders[prefs.provider],caseTask=!['analysis','selection','coverage'].includes(task),cases=context.document.content.cases.filter(c=>c.included);
-  function reset(){setPrepared(null);setPrompt('');setRaw('');setProposal(null);setConsent(false);setReviewed(false);setApiKey('');setError('');setSuccess('');}
+  function reset(){setPrepared(null);setPrompt('');setRaw('');setProposal(null);setConsent(false);setReviewed(false);setApiKey('');setError('');setSuccess('');setApiState('idle');setApiError('');}
   function editProposal(p:AIProposal){setProposal(p);setReviewed(false);setSuccess('');}
-  async function generate(){if(!prepared)return;setBusy(true);setError('');setSuccess('');const key=apiKey;setApiKey('');
+  async function generate(){if(!prepared)return;setBusy(true);setError('');setSuccess('');setApiError('');setApiState('loading');setRaw('');setProposal(null);setReviewed(false);const key=apiKey;setApiKey('');
     const input={...prepared.target,project_id:context.project.id,version:prepared.context.document.version,provider:prefs.provider,model:prefs.model,prompt,api_key:key,consent};
-    try{const result=await backend.aiGenerate(input);setRaw(result.text);try{setProposal(parseAIResponse(result.text,prepared.context,prepared.target));}catch(err){setProposal(null);setError(message(err));}
-      setSuccess(`Respuesta recibida de ${provider.name}. Revisa su contenido antes de aplicarlo.${result.input_tokens!==null?` Entrada: ${result.input_tokens} tokens.`:''}${result.output_tokens!==null?` Salida: ${result.output_tokens} tokens.`:''}`);setReviewed(false);
-    }catch(e){setError(message(e));}finally{input.api_key='';setBusy(false);setConsent(false);}}
+    try{const result=await backend.aiGenerate(input);setRaw(result.text);setApiState('received');try{setProposal(parseAIResponse(result.text,prepared.context,prepared.target));
+      setSuccess(`Respuesta recibida de ${provider.name}. Revisa su contenido antes de aplicarlo.${result.input_tokens!==null?` Entrada: ${result.input_tokens} tokens.`:''}${result.output_tokens!==null?` Salida: ${result.output_tokens} tokens.`:''}`);
+      }catch(err){setProposal(null);setApiError(message(err));}
+    }catch(e){setApiError(message(e));setApiState('failed');}finally{input.api_key='';setBusy(false);setConsent(false);}}
   async function apply(){if(!prepared||!proposal)return;setBusy(true);setError('');setSuccess('');try{
     if(!reviewed)throw new Error('Revisa expresamente la propuesta antes de aplicarla.');
     const fresh=await backend.qaDocument(context.project.id);if(!fresh||fresh.version!==prepared.context.document.version)throw new Error('La cartilla cambió desde que preparaste el prompt. Conserva tu propuesta y recarga; no se aplicó ningún cambio.');
     const command=aiProposalCommand(proposal,prepared.context,prepared.target,()=>crypto.randomUUID());await run(command);reset();
   }catch(e){setError(message(e));}finally{setBusy(false);}}
-  function validateResponse(){if(!prepared)return;setError('');setSuccess('');try{setProposal(parseAIResponse(raw,prepared.context,prepared.target));setReviewed(false);setSuccess('Formato, prioridades, funcionalidades y citas comprobados. Revisa el significado antes de aplicar.');}catch(e){setError(message(e));setProposal(null);}}
+  function validateResponse(){if(!prepared)return;setError('');setApiError('');setSuccess('');try{setProposal(parseAIResponse(raw,prepared.context,prepared.target));setReviewed(false);setSuccess('Formato, prioridades, funcionalidades y citas comprobados. Revisa el significado antes de aplicar.');}catch(e){if(prefs.mode==='api')setApiError(message(e));else setError(message(e));setProposal(null);}}
   if(loading)return h('p',{role:'status'},'Cargando el asistente…');
-  const responseEditor=prepared&&h('div',null,h(QAField,{label:'Respuesta de la IA en JSON',value:raw,onChange:v=>{setRaw(v);setProposal(null);setReviewed(false);},rows:10,maxLength:AI_RESPONSE_LIMIT}),
+  const responseEditor=prepared&&h('div',null,h(QAField,{label:'Respuesta de la IA en JSON',value:raw,onChange:v=>{setRaw(v);setProposal(null);setReviewed(false);setApiError('');},rows:10,maxLength:AI_RESPONSE_LIMIT}),
     h('details',{className:'qa-details'},h('summary',null,'Ver el formato esperado para corregir la respuesta'),h('pre',{className:'ai-format'},JSON.stringify(responseShape(prepared.target.task),null,2))),
     h(Button,{variant:'secondary',disabled:busy||!raw.trim(),onClick:validateResponse},'Validar respuesta'));
   return h('section',{className:'panel form-panel ai-assistant'},h('div',{className:'panel-title'},h('div',null,h('span',{className:'eyebrow'},'IA OPCIONAL'),h('h2',null,'Asistente de la cartilla')),h('a',{href:'#mi-ia',className:'text-link'},'Mi inteligencia artificial')),
@@ -87,9 +89,9 @@ export function AIAssistant({backend,context,initialTask,caseId,run}:{backend:Ba
         h('p',{className:'small muted'},'La clave se utiliza para esta consulta y se borra del campo al iniciarla. No se guarda en el navegador ni en la base. La respuesta se recibe y se valida automáticamente en esta página.'),
         h('p',{className:'small muted'},'Máximo de salida: 4.096 tokens; 4 solicitudes por minuto y 20 por 24 horas por cuenta. Estos límites no son un presupuesto monetario. Comprueba las tarifas, el modelo y tus condiciones de privacidad; no se garantiza acceso gratuito.'),h(Button,{disabled:busy||!consent||!apiKey||!prefs.model.trim(),onClick:()=>void generate()},busy?'Consultando…':'Generar con IA')),
       h('h3',null,prefs.mode==='api'?'2. Revisa la propuesta':'2. Pega y valida la respuesta'),
-      prefs.mode==='manual'?responseEditor:!raw?h('p',{className:'notice info',role:'status'},busy?'La IA está preparando la respuesta. Se mostrará aquí al terminar.':'Pulsa «Generar con IA» para recibir la propuesta aquí mismo y revisarla antes de guardarla.'):
-        h('div',null,!proposal&&h('p',{className:'notice info'},'La respuesta necesita una corrección de formato o de sus citas antes de poder revisarla. Puedes corregirla en el detalle de abajo y volver a validarla.'),
-          h('details',{className:'qa-details',open:!proposal},h('summary',null,'Ver respuesta original y corregir formato'),responseEditor)),
+      prefs.mode==='manual'?responseEditor:h('div',null,h(AIRequestFeedback,{state:apiState,error:apiError}),apiState==='received'&&h('div',null,
+        !proposal&&h('p',{className:'notice info'},'Puedes corregir la respuesta en el detalle de abajo y volver a validarla.'),
+        h('details',{className:'qa-details',open:!proposal},h('summary',null,'Ver respuesta original y corregir formato'),responseEditor))),
       proposal&&h('div',null,h(ProposalEditor,{proposal,onChange:editProposal,functionalities:prepared.context.document.content.context.functionalities}),proposal.kind!=='coverage'&&h('div',{className:'ai-apply'},h('p',{className:'notice info'},proposal.kind==='analysis'?'Se actualizará la descripción y el funcionamiento; se conservarán las funcionalidades anteriores y se agregarán o actualizarán las propuestas. El cambio requiere nueva revisión.':proposal.kind==='selection'?'Se agregarán los nuevos casos a la selección existente, sin borrar los anteriores. El conjunto requerirá revisión.':'Se reemplazarán los campos de este caso. Si estaba aprobado, requerirá una nueva revisión. Las versiones anteriores se conservan.'),
         h('label',{className:'checkbox'},h('input',{type:'checkbox',checked:reviewed,disabled:busy,onChange:(e:ChangeEvent<HTMLInputElement>)=>setReviewed(e.target.checked)}),' Revisé requisitos, argumentos, resultados y citas; deseo aplicar esta propuesta como borrador.'),h(Button,{disabled:busy||!reviewed,onClick:()=>void apply()},busy?'Aplicando…':'Aplicar propuesta como borrador')))),
     prepared&&h('div',{className:'form-actions'},h(Button,{variant:'ghost',disabled:busy,onClick:reset},'Descartar consulta')));
