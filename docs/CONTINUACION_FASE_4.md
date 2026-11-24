@@ -41,4 +41,13 @@ SQLite local conserva la misma autorización, CSRF, límites, asociación y reti
 
 Esta entrega cubre capturas manuales por paso y el Excel con imágenes y navegación. No incorpora todavía documentos fuente, análisis de imágenes con IA, videos ni la administración completa de plantillas. Los pendientes de acceso de Fase 1 permanecen. El chat gratuito y sus secretos no se modificaron.
 
-Pendiente de cierre de esta implementación: verificaciones finales, publicación de código y comprobación de GitHub Actions/Pages. Actualizar este apartado con los resultados reales.
+## Publicación comprobada
+
+Código publicado: [`9fe85c5495153d47737e6fe5130f1925836fd6b1`](https://github.com/brancoretto24102-ui/camposol-qa/commit/9fe85c5495153d47737e6fe5130f1925836fd6b1).
+
+- [Verificación 45409710950](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45409710950): completed/success.
+- [Pages 45409710872](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45409710872): completed/success.
+- URL pública y JavaScript servido: HTTP 200. En el JavaScript público `index-DI9E4aiW.js` se comprobaron los controles de capturas y descarga.
+- Se abrió la publicación en el navegador y se comprobó la pantalla de acceso. En la sesión existente había una propuesta de IA pendiente: se conservó sin recargar ni aplicar su contenido. Para ver la actualización en esa pestaña, la persona debe guardar primero la propuesta que desee conservar y luego recargar.
+
+Se conservaron las cartillas, los perfiles y los roles existentes. El almacenamiento privado ya está preparado por la migración comprobada. No se subieron capturas empresariales ni se usaron las de la plantilla como evidencia. La primera carga HTTP autenticada a Supabase y la revisión con Microsoft Excel de escritorio siguen como comprobaciones pendientes, separadas de la verificación automatizada y del lector independiente ya realizada.

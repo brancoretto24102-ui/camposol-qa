@@ -86,7 +86,7 @@ Corrección posterior del flujo y errores API publicada el 24/11/2026: `ffd51725
 
 El aviso previo de contraseñas filtradas deshabilitadas permanece: [referencia oficial](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). La política explícita de contadores eliminó la nueva observación informativa de RLS sin política.
 
-Fase 4 corresponde a archivos, capturas y evidencias. No se implementan aún la subida de documentos, análisis de imágenes, Hoja de Control ni exportación Excel. No publicar el libro empresarial original.
+La ampliación de capturas por paso, Hoja de Control y exportación Excel con imágenes y navegación interna está publicada: [Continuación de capturas y Excel](CONTINUACION_FASE_4.md). Siguen pendientes los documentos fuente y el análisis de imágenes. No publicar el libro empresarial original.
 
 ## Fuentes técnicas consultadas
 
