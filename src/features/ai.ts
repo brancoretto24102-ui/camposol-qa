@@ -7,6 +7,7 @@ import {Alert,Button,PageTitle} from '../ui.ts';
 import {message} from '../forms.ts';
 import {QAField} from './qa-common.ts';
 import {AIRequestFeedback,type AIRequestState} from './ai-feedback.ts';
+import {FreeChatService} from './free-chat-status.ts';
 
 function ProviderLinks({provider}:{provider:AIProvider}){const p=aiProviders[provider];return provider==='none'?null:h('div',{className:'ai-links'},
   h('a',{href:p.docs,target:'_blank',rel:'noopener noreferrer'},'Documentación oficial'),p.pricing&&h('a',{href:p.pricing,target:'_blank',rel:'noopener noreferrer'},'Tarifas y límites'),
@@ -25,15 +26,15 @@ export function AISettings({backend}:{backend:Backend}){
   const [prefs,setPrefs]=useState<AIPreferences>({...defaultAIPreferences}),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[success,setSuccess]=useState('');
   async function load(){setLoading(true);try{setPrefs(await backend.aiPreferences());setError('');}catch(e){setError(message(e));}finally{setLoading(false);}}
   useEffect(()=>{void load();},[]);
-  return h('div',null,h(PageTitle,{eyebrow:'ASISTENCIA OPCIONAL',title:'Mi inteligencia artificial',text:'Elige cómo trabajar. La elaboración manual siempre está disponible.'}),h(Alert,{message:error}),h(Alert,{message:success,success:true}),
-    h('section',{className:'panel form-panel narrow'},loading?h('p',{role:'status'},'Cargando tus preferencias…'):h('form',{onSubmit:async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();setBusy(true);setError('');setSuccess('');try{setPrefs(await backend.saveAIPreferences(validateAIPreferences(prefs)));setSuccess('Preferencias guardadas solo para tu cuenta.');}catch(err){setError(message(err));}finally{setBusy(false);}}},
+  return h('div',null,h(PageTitle,{eyebrow:'ASISTENCIA OPCIONAL',title:'Mi inteligencia artificial',text:'Utiliza el chat gratuito de la cartilla o elige otra IA. La elaboración manual siempre está disponible.'}),h(FreeChatService,{backend}),h(Alert,{message:error}),h(Alert,{message:success,success:true}),
+    h('section',{className:'panel form-panel narrow'},h('h2',null,'Otra IA · preferencias opcionales'),loading?h('p',{role:'status'},'Cargando tus preferencias…'):h('form',{onSubmit:async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();setBusy(true);setError('');setSuccess('');try{setPrefs(await backend.saveAIPreferences(validateAIPreferences(prefs)));setSuccess('Preferencias guardadas solo para tu cuenta.');}catch(err){setError(message(err));}finally{setBusy(false);}}},
       h(ProviderFields,{value:prefs,onChange:setPrefs,busy}),h('p',{className:'muted'},'Esta elección es independiente de tu inicio de sesión. Se guarda el proveedor, la modalidad y el modelo; nunca una clave API.'),
       h('div',{className:'form-actions'},h(Button,{variant:'secondary',disabled:busy,onClick:()=>void load()},'Recargar preferencias'),h(Button,{type:'submit',disabled:busy},busy?'Guardando…':'Guardar preferencias')))),
     h('section',{className:'panel form-panel'},h('h2',null,'La IA propone; tú decides'),h('ol',null,h('li',null,'Abre el asistente desde una cartilla guardada.'),h('li',null,'Revisa y, si hace falta, anonimiza el texto exacto del prompt.'),h('li',null,'Autoriza su uso y cópialo a tu IA, o envíalo con tu propia API.'),h('li',null,'Valida la respuesta, edita sus campos y aplica una propuesta como borrador. La aprobación documental se realiza después, con los permisos habituales.')),
       h('p',{className:'small muted'},'No compartas información interna de Camposol con servicios personales sin autorización de tu organización. Los adjuntos y el análisis de imágenes se incorporarán en la fase de evidencias.')));
 }
 
-function ProposalEditor({proposal,onChange,functionalities}:{proposal:AIProposal;onChange:(p:AIProposal)=>void;functionalities:Functionality[]}){
+export function ProposalEditor({proposal,onChange,functionalities}:{proposal:AIProposal;onChange:(p:AIProposal)=>void;functionalities:Functionality[]}){
   const edit=(fn:(p:AIProposal)=>void)=>{const p=structuredClone(proposal);fn(p);onChange(p);};
   const field=(label:string,value:string,change:(p:AIProposal,v:string)=>void,rows=3,maxLength=4000)=>h(QAField,{label,value,onChange:v=>edit(p=>change(p,v)),rows,maxLength});
   return h('div',{className:'ai-proposal'},h('h3',null,'Propuesta editable · pendiente de tu revisión'),
@@ -48,11 +49,12 @@ function ProposalEditor({proposal,onChange,functionalities}:{proposal:AIProposal
     proposal.kind==='coverage'&&h('div',null,h('p',null,'Informe de consulta. Las observaciones no crean casos ni aprueban el documento.'),!proposal.gaps!.length&&h('p',null,'La respuesta no señaló brechas; esto no acredita cobertura completa.'),...proposal.gaps!.map((g,i)=>h('blockquote',{key:i},h('p',null,g.detail),h('small',null,`Funcionalidad: ${functionalities.find(f=>f.id===g.functionality_id)?.name??'Sin identificar'}`),h('p',null,`Fuente: ${g.source_quote}`)))));
 }
 
-export function AIAssistant({backend,context,initialTask,caseId,run}:{backend:Backend;context:AIContext;initialTask:AITask;caseId?:string;run:(command:QACommand)=>Promise<QADocument>}){
+export function AIAssistant({backend,context,initialTask,caseId,run,onBusy}:{backend:Backend;context:AIContext;initialTask:AITask;caseId?:string;run:(command:QACommand)=>Promise<QADocument>;onBusy?:(busy:boolean)=>void}){
   const [prefs,setPrefs]=useState<AIPreferences>({...defaultAIPreferences}),[loading,setLoading]=useState(true),[task,setTask]=useState<AITask>(initialTask),[selectedCase,setSelectedCase]=useState(caseId??''),
     [prepared,setPrepared]=useState<{context:AIContext;target:AITarget}|null>(null),[prompt,setPrompt]=useState(''),[raw,setRaw]=useState(''),[proposal,setProposal]=useState<AIProposal|null>(null),[consent,setConsent]=useState(false),[reviewed,setReviewed]=useState(false),[apiKey,setApiKey]=useState(''),
     [find,setFind]=useState(''),[replacement,setReplacement]=useState('[DATO OMITIDO]'),[error,setError]=useState(''),[success,setSuccess]=useState(''),[busy,setBusy]=useState(false),[apiState,setApiState]=useState<AIRequestState>('idle'),[apiError,setApiError]=useState('');
   useEffect(()=>{void backend.aiPreferences().then(setPrefs).catch(e=>setError(message(e))).finally(()=>setLoading(false));},[]);
+  useEffect(()=>{onBusy?.(busy);},[busy,onBusy]);
   const provider=aiProviders[prefs.provider],caseTask=!['analysis','selection','coverage'].includes(task),cases=context.document.content.cases.filter(c=>c.included);
   function reset(){setPrepared(null);setPrompt('');setRaw('');setProposal(null);setConsent(false);setReviewed(false);setApiKey('');setError('');setSuccess('');setApiState('idle');setApiError('');}
   function editProposal(p:AIProposal){setProposal(p);setReviewed(false);setSuccess('');}

@@ -1,6 +1,10 @@
 import {defaultAIPreferences,validateAIPreferences,validateAIGenerate,assertAITarget,parseAIResponse} from '../src/ai-domain.ts';
 import {requireQA,identifier} from '../src/qa-domain.ts';
 import {callAIProvider} from '../supabase/functions/_shared/ai-providers.ts';
+import {validateChatInput,parseChatResult} from '../src/ai-chat-domain.ts';
+import {callFreeChat,freeChatStatus,freeChatUnavailable} from '../supabase/functions/_shared/ai-free-chat.ts';
+
+const freeConfig=()=>({key:process.env.GROQ_API_KEY??'',freePlanConfirmed:process.env.GROQ_FREE_PLAN_CONFIRMED==='true'});
 
 export class AIStore {
   constructor(store){this.store=store;this.db=store.db;
@@ -27,5 +31,11 @@ export class AIStore {
     try{input=validateAIGenerate(value);const context=this.context(user,input);this.reserve(user);const result=await callAIProvider(input,fetcher);
       try{parseAIResponse(result.text,context,input);}catch(error){result.validation_error=error.message;}return result;
     }finally{if(input)input.api_key='';if(value&&typeof value==='object')delete value.api_key;}
+  }
+  freeStatus(user,config=freeConfig()){this.store.requireUser(user);return freeChatStatus(config);}
+  async chat(user,value,fetcher,config=freeConfig()){
+    const input=validateChatInput(value),context=this.context(user,input);
+    requireQA(freeChatStatus(config).enabled,freeChatUnavailable,503);this.reserve(user);
+    return parseChatResult(await callFreeChat(input,config,fetcher),context,input);
   }
 }

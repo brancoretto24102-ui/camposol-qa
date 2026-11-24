@@ -47,6 +47,8 @@ export function createApp({store=new Store(resolve(root,process.env.QA_DATA_DIR?
       if(path==='/api/ai/preferences'&&req.method==='GET')return send(res,200,store.ai.preferences(user));
       if(path==='/api/ai/preferences'&&req.method==='PUT')return send(res,200,store.ai.savePreferences(user,await body(req)));
       if(path==='/api/ai/generate'&&req.method==='POST')return send(res,200,await store.ai.generate(user,await body(req,280_000)));
+      if(path==='/api/ai/free/status'&&req.method==='GET')return send(res,200,store.ai.freeStatus(user));
+      if(path==='/api/ai/chat'&&req.method==='POST')return send(res,200,await store.ai.chat(user,await body(req,100_000)));
       if(path==='/api/applications'&&req.method==='GET')return send(res,200,store.applications(user));
       if(path==='/api/applications'&&req.method==='PUT')return send(res,200,store.qa.saveApplication(user,await body(req)));
       if(path==='/api/qa/methodologies'&&req.method==='GET')return send(res,200,store.qa.methodologies(user));

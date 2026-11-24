@@ -9,7 +9,7 @@ import {Alert,Button,Empty,PageTitle,dateTime} from '../ui.ts';
 import {message,value} from '../forms.ts';
 import {moveItem,QAField,ReviewBadge,ReviewInfo} from './qa-common.ts';
 import {MatrixPreview} from './qa-matrix.ts';
-import {AIAssistant} from './ai.ts';
+import {CartillaAIAssistant} from './ai-workspace.ts';
 import type {AITask} from '../ai-domain.ts';
 
 type Run=(command:QACommand)=>Promise<QADocument>;
@@ -144,6 +144,6 @@ export function QAWorkspace({backend,profile,id,onChanged}:{backend:Backend;prof
     tab==='selection'&&h(SelectionEditor,{key:doc.version,doc,actor,method,run,busy,onDirty:setDirty}),
     tab==='cases'&&(doc.content.context.review.status!=='aprobado'||doc.content.selection.status!=='aprobado'?h('section',{className:'panel'},h(Empty,{title:'Aprueba primero el contexto y la selección',text:'El editor se habilita con el conjunto de casos revisado.'})):activeCase?h(CaseEditor,{key:`${activeCase}-${doc.version}`,doc,actor,method,caseId:activeCase,onNavigate:setCaseId,run,busy,onDirty:setDirty}):h('section',{className:'panel'},h(Empty,{title:'No hay casos incluidos',text:'Revisa la selección de casos.'}))),
     tab==='matrix'&&h('section',{className:'panel form-panel'},h('h2',null,'Vista previa de la matriz'),h('p',{className:'muted'},'Muestra el contenido guardado. Los estados de aprobación se consultan en cada caso.'),h(MatrixPreview,{content:doc.content,config:method.config})),
-    tab==='ai'&&actor.can_edit&&h(AIAssistant,{key:doc.version,backend,context:{project,document:doc,methodology:method},initialTask:assistantTask,caseId:activeCase,run}),
+    tab==='ai'&&actor.can_edit&&h(CartillaAIAssistant,{key:`${project.id}-${doc.version}`,backend,context:{project,document:doc,methodology:method},initialTask:assistantTask,caseId:activeCase,run}),
     tab==='history'&&h(DocumentHistory,{backend,id,method}));
 }

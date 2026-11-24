@@ -1,12 +1,16 @@
-import {parseAIResponse,validateAIGenerate,type AIContext,type AIGenerateInput,type AIResult} from '../../../src/ai-domain.ts';
+import {parseAIResponse,validateAIGenerate,assertAITarget,type AIContext,type AIGenerateInput,type AIResult} from '../../../src/ai-domain.ts';
 import {QAError} from '../../../src/qa-domain.ts';
+import {validateChatInput,parseChatResult,FREE_CHAT_MODEL,type AIRequestTarget,type AIChatInput,type ChatTransportResult,type FreeChatStatus} from '../../../src/ai-chat-domain.ts';
+import {freeChatUnavailable} from './ai-free-chat.ts';
 
 export const aiOrigins=['https://brancoretto24102-ui.github.io','https://camposol-qa.ingbca-360.chatgpt.site','http://127.0.0.1:5173','http://127.0.0.1:4317','http://localhost:5173','http://localhost:4317'];
 interface Dependencies {
   authenticate:(token:string)=>Promise<unknown>;
-  load:(caller:unknown,input:AIGenerateInput)=>Promise<AIContext>;
-  reserve:(caller:unknown,input:AIGenerateInput)=>Promise<void>;
+  load:(caller:unknown,input:AIRequestTarget)=>Promise<AIContext>;
+  reserve:(caller:unknown,input:AIRequestTarget)=>Promise<void>;
   call:(input:AIGenerateInput)=>Promise<AIResult>;
+  freeStatus?:()=>FreeChatStatus;
+  chat?:(input:AIChatInput)=>Promise<ChatTransportResult>;
 }
 export function createAIHandler(deps:Dependencies){return async(req:Request):Promise<Response>=>{
   const origin=req.headers.get('Origin')??'',allowed=aiOrigins.includes(origin);
@@ -25,6 +29,15 @@ export function createAIHandler(deps:Dependencies){return async(req:Request):Pro
     try{for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>280_000){await reader.cancel();return send(413,{error:'La solicitud es demasiado grande.'});}chunks.push(value);}}finally{reader.releaseLock();}
     const bytes=new Uint8Array(size);let offset=0;for(const c of chunks){bytes.set(c,offset);offset+=c.length;}
     try{raw=JSON.parse(new TextDecoder().decode(bytes));}catch{return send(400,{error:'La solicitud no contiene JSON válido.'});}
+    if(raw?.action==='free_status'){
+      if(Object.keys(raw).length!==1)throw new QAError(422,'La consulta de disponibilidad no admite otros campos.');
+      return send(200,deps.freeStatus?.()??{enabled:false,provider:'groq',model:FREE_CHAT_MODEL});
+    }
+    if(raw?.action==='chat'){
+      const chat=validateChatInput(raw),context=await deps.load(caller,chat);assertAITarget(context,chat);
+      if(!deps.chat||!deps.freeStatus?.().enabled)throw new QAError(503,freeChatUnavailable);
+      await deps.reserve(caller,chat);return send(200,parseChatResult(await deps.chat(chat),context,chat));
+    }
     input=validateAIGenerate(raw);const context=await deps.load(caller,input);await deps.reserve(caller,input);
     const result=await deps.call(input);try{parseAIResponse(result.text,context,input);}catch(error){result.validation_error=error instanceof Error?error.message:'Revisa el formato de la respuesta.';}
     return send(200,result);

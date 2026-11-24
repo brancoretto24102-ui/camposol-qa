@@ -62,7 +62,7 @@ La futura integración directa debe implementar un adaptador separado para Micro
 - `public.ai_provider_preferences`: lectura propia con RLS y escritura mediante comando versionado. Ni un administrador puede leer las preferencias de otra persona por la API de la aplicación.
 - `private.qa_ai_usage`: contadores por cuenta; sin acceso cliente y con política explícita de denegación.
 - `qa_ai_reserve`: verifica edición efectiva, perfil activo, proyecto, archivo, versión y aprobación de etapas antes de reservar una solicitud.
-- Edge Function `qa-ai`, versión 3, estado ACTIVE y `verify_jwt:true`. Verifica además el token con Auth y usa el JWT del usuario para RLS. No utiliza una clave privilegiada para consultar proyectos. La versión 3 agrega la clasificación segura de errores 429 sin modificar la autenticación ni las cuotas.
+- Edge Function `qa-ai`, versión 4, estado ACTIVE y `verify_jwt:true`. Verifica además el token con Auth y usa el JWT del usuario para RLS. No utiliza una clave privilegiada para consultar proyectos. La versión 3 agregó la clasificación segura de errores 429; la versión 4 incorpora disponibilidad autenticada y chat gratuito administrado, sin modificar autenticación ni cuotas.
 - CORS del manejador restringido a GitHub Pages, la publicación anterior autorizada y los retornos locales. La plataforma rechaza las llamadas sin JWT antes de ejecutar el manejador.
 - Las propuestas se guardan mediante los comandos documentales existentes, sin una vía alternativa de aprobación.
 
@@ -76,6 +76,8 @@ No repetirlas ni inicializar el esquema. `database/phase3-rls-tests.sql` usa act
 Las compilaciones incluyen TypeScript del frontend y del intermediario mediante `tsconfig.functions.json`. La declaración mínima `runtime.d.ts` solo permite comprobar en CI la superficie de Deno utilizada; el despliegue usa sus propios globales y no incorpora ese archivo al paquete. Dependencias existentes y lockfile conservados.
 
 ## Estado y continuación
+
+Extensión del 24/11/2026: el usuario priorizó un chat gratuito integrado con otro proveedor tras revisar la elegibilidad de Sign in with ChatGPT. Se implementó «Chat gratuito» con Groq como primera modalidad del asistente, conservando las opciones anteriores y los permisos. Activación, límites, comprobaciones y pendientes: [CHAT_GRATUITO.md](CHAT_GRATUITO.md). La conexión no se considera activada hasta configurar sus secretos de servidor y comprobarla con una organización Free; no pedir ni publicar una clave por chat.
 
 Código publicado `d776947a593c21ff20751bf1e340a9e240b3e0f6`; ambos flujos de GitHub terminaron correctamente. La revisión se realizó en la URL pública con la sesión existente y respuestas controladas. La cartilla técnica quedó archivada y se restauró Ninguna IA. Resultados de pruebas, revisión visual y publicación: [VERIFICACION_FASE_3.md](VERIFICACION_FASE_3.md). Los pendientes de acceso de Fase 1 siguen documentados: segunda cuenta, recuperación real y OAuth autorizado. No se modificó SMTP ni se elevaron permisos.
 

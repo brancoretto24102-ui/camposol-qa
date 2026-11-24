@@ -1,11 +1,13 @@
 import {createClient,type SupabaseClient} from 'npm:@supabase/supabase-js@2.119.2';
 import {createAIHandler} from '../_shared/ai-handler.ts';
 import {callAIProvider} from '../_shared/ai-providers.ts';
+import {callFreeChat,freeChatStatus} from '../_shared/ai-free-chat.ts';
 import {assertAITarget,type AIContext} from '../../../src/ai-domain.ts';
 import {QAError} from '../../../src/qa-domain.ts';
 
 // The gateway verifies the JWT; getUser also validates it against Auth. All
 // queries and RPC calls below use the caller's JWT and RLS, never service_role.
+const freeConfig=()=>({key:Deno.env.get('GROQ_API_KEY')??'',freePlanConfirmed:Deno.env.get('GROQ_FREE_PLAN_CONFIRMED')==='true'});
 const handler=createAIHandler({
   async authenticate(token){
     let publicKey=Deno.env.get('SUPABASE_ANON_KEY');
@@ -33,5 +35,7 @@ const handler=createAIHandler({
     if(error)throw new QAError(error.code==='42501'?403:error.code==='40001'?409:error.code==='P0001'?429:422,error.message);
   },
   call:input=>callAIProvider(input),
+  freeStatus:()=>freeChatStatus(freeConfig()),
+  chat:input=>callFreeChat(input,freeConfig()),
 });
 Deno.serve(handler);
