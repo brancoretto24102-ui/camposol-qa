@@ -1,12 +1,12 @@
 # Camposol QA · 0.1.0
 
-Aplicación con Fase 2 manual: proyectos, aplicaciones, metodología DigiProy 1.0 versionada, cartillas, funcionalidades, selección y aprobación de casos, editor de pasos, matriz e historial documental.
+Aplicación con Fase 3 de asistencia opcional: metodología DigiProy versionada, cartillas, casos y pasos, revisión humana, matriz e historial; prompts manuales para ChatGPT, Gemini, Claude y Copilot, y adaptadores de API propia para OpenAI, Gemini y Claude.
 
-URL pública: **https://brancoretto24102-ui.github.io/camposol-qa/**. Cualquier persona puede abrir el acceso; los proyectos requieren una cuenta confirmada, activada y autorizada. Se conserva el repositorio público y el backend independiente `camposol-qa-dev`, proyecto Supabase `frhmxbdombsqubqlchkj`.
+URL pública: **https://brancoretto24102-ui.github.io/camposol-qa/**. Se conserva el repositorio y Supabase `camposol-qa-dev` (`frhmxbdombsqubqlchkj`). Los proyectos requieren una cuenta confirmada, activada y autorizada.
 
-**Verificación de Fase 2:** 40 pruebas locales y 44 comprobaciones RLS remotas superadas, compilación local/Supabase correcta y auditoría sin vulnerabilidades informadas. GitHub Pages publicó el código `b8f9834a69d29abb6d4863c3d0b605189e3c4e2a` y ambos flujos terminaron correctamente. Editor, matriz e historial revisados con datos ficticios locales en escritorio y a 390 px. Las comprobaciones remotas se revirtieron sin modificar la cuenta y el proyecto existentes. Estado de publicación y revisión de interfaz: [verificación de Fase 2](docs/VERIFICACION_FASE_2.md).
+**Verificación de Fase 3:** 66 pruebas locales y 28 comprobaciones RLS remotas superadas. Las compilaciones comprueban también los tipos del intermediario de IA. Ninguna IA se activa por defecto; no se almacenan claves ni se realizaron llamadas pagadas. Estado de publicación y pruebas interactivas: [verificación de Fase 3](docs/VERIFICACION_FASE_3.md).
 
-Para utilizar la entrega y continuar el proyecto: [Continuación de Fase 2](docs/CONTINUACION_FASE_2.md). La segunda cuenta y la recuperación real de Fase 1 siguen pendientes; su registro se conserva en [Continuación de Fase 1](docs/CONTINUACION_FASE_1.md). IA, evidencias y Excel corresponden a las fases siguientes.
+Uso y continuación: [Continuación de Fase 3](docs/CONTINUACION_FASE_3.md). Las propuestas se revisan y aplican como borradores, con las aprobaciones de Fase 2. La modalidad manual no requiere una API. Las conexiones API requieren credencial temporal, modelo compatible y autorización de cada envío. La segunda cuenta y la recuperación de Fase 1 siguen pendientes. Evidencias y Excel corresponden a las fases siguientes.
 
 ## Desarrollo local
 
@@ -38,7 +38,7 @@ npm audit --audit-level=high
 
 Las pruebas del backend no requieren paquetes externos: `node --test tests/*.test.mjs`. La compilación sí requiere las dependencias. Después de compilar, `node server/index.mjs` sirve también `dist/`, con la interfaz completa en http://127.0.0.1:4317 . No utilizar ese servidor en producción.
 
-Las versiones directas y transitivas quedan fijadas mediante `package.json` y `package-lock.json`. El flujo `Verificar Fase 1` instala con `npm ci`, ejecuta las pruebas y el chequeo de tipos, compila y audita. Conserva `dist/`, lockfile e informes durante un día; no despliega ni modifica la base de datos. Sus permisos permanecen en `contents: read`.
+Las versiones directas y transitivas quedan fijadas mediante `package.json` y `package-lock.json`. El flujo `Verificar Fase 1` instala con `npm ci`, ejecuta las pruebas y el chequeo de tipos, compila frontend y verifica los tipos de la función de IA, y audita. Conserva `dist/`, lockfile e informes durante un día; no despliega ni modifica la base de datos. Sus permisos permanecen en `contents: read`.
 
 ## Publicación en GitHub Pages
 

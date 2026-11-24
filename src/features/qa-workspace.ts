@@ -9,6 +9,8 @@ import {Alert,Button,Empty,PageTitle,dateTime} from '../ui.ts';
 import {message,value} from '../forms.ts';
 import {moveItem,QAField,ReviewBadge,ReviewInfo} from './qa-common.ts';
 import {MatrixPreview} from './qa-matrix.ts';
+import {AIAssistant} from './ai.ts';
+import type {AITask} from '../ai-domain.ts';
 
 type Run=(command:QACommand)=>Promise<QADocument>;
 type Dirty=(dirty:boolean)=>void;
@@ -117,7 +119,7 @@ function DocumentHistory({backend,id,method}:{backend:Backend;id:string;method:M
 }
 
 export function QAWorkspace({backend,profile,id,onChanged}:{backend:Backend;profile:Profile;id:string;onChanged:()=>Promise<void>}){
-  const [project,setProject]=useState<Project|null>(null),[doc,setDoc]=useState<QADocument|null>(null),[methods,setMethods]=useState<MethodologyVersion[]>([]),[members,setMembers]=useState<Member[]>([]),[tab,setTab]=useState('context'),[caseId,setCaseId]=useState(''),[error,setError]=useState(''),[success,setSuccess]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[dirty,setDirty]=useState(false);
+  const [project,setProject]=useState<Project|null>(null),[doc,setDoc]=useState<QADocument|null>(null),[methods,setMethods]=useState<MethodologyVersion[]>([]),[members,setMembers]=useState<Member[]>([]),[tab,setTab]=useState('context'),[caseId,setCaseId]=useState(''),[error,setError]=useState(''),[success,setSuccess]=useState(''),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[dirty,setDirty]=useState(false),[assistantTask,setAssistantTask]=useState<AITask>('analysis');
   async function load(){const [p,d,m,team]=await Promise.all([backend.project(id),backend.qaDocument(id),backend.methodologies(),backend.members(id)]);setProject(p);setDoc(d);setMethods(m);setMembers(team);setDirty(false);}
   useEffect(()=>{void load().catch(e=>setError(message(e))).finally(()=>setLoading(false));},[id]);
   async function run(command:QACommand){setBusy(true);setError('');setSuccess('');try{const next=await backend.qaCommand(id,doc?.version??0,command);setDoc(next);setDirty(false);try{await onChanged();}catch{setError('El contenido quedó guardado. No se pudo actualizar el resumen de proyectos; recarga cuando vuelva la conexión.');}setSuccess(command.action==='approve'?'Versión aprobada.':command.action==='correct'?'Observación registrada.':command.action==='submit'?'Contenido enviado a revisión.':'Cambios guardados.');return next;}catch(e){setError(message(e));throw e;}finally{setBusy(false);}}
@@ -126,7 +128,7 @@ export function QAWorkspace({backend,profile,id,onChanged}:{backend:Backend;prof
   const actor:QAActor={...profile,can_edit:project.can_edit&&project.status!=='archivado',can_review:project.status!=='archivado'&&(profile.role==='administrador'||(profile.role==='revisor'&&(project.owner_id===profile.id||members.some(m=>m.user_id===profile.id&&m.role==='revisor'))))};
   const available=methods.filter(m=>m.application_id===project.application_id&&m.status==='aprobado'),method=methods.find(m=>m.id===doc?.methodology_version_id);
   const included=doc?.content.cases.filter(c=>c.included)??[],activeCase=included.some(c=>c.id===caseId)?caseId:included[0]?.id;
-  const header=h(PageTitle,{eyebrow:`CARTILLA ${project.code}`,title:project.name,text:project.objective},h('a',{href:`#proyecto/${id}`,className:'button secondary'},'Información y equipo'));
+  const header=h(PageTitle,{eyebrow:`CARTILLA ${project.code}`,title:project.name,text:project.objective},h('div',{className:'qa-row-actions'},h('a',{href:`#proyecto/${id}`,className:'button secondary'},'Información y equipo'),actor.can_edit&&h(Button,{variant:'secondary',disabled:busy||dirty||!doc,onClick:()=>{setAssistantTask(tab==='selection'?'selection':tab==='cases'?'generate_case':'analysis');setTab('ai');setError('');setSuccess('');}},'Asistente IA')));
   if(!doc)return h('div',null,header,h(Alert,{message:error}),h('section',{className:'panel form-panel narrow'},h('h2',null,'Selecciona la metodología'),
     h('p',null,'La cartilla conservará esta versión para que sus criterios no cambien al publicarse otra.'),actor.can_edit&&available.length?h('form',{onSubmit:(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();void run({action:'init',methodology_version_id:value(new FormData(e.currentTarget),'method')}).catch(()=>{});}},
       h('label',{className:'field'},h('span',null,'Metodología aprobada *'),h('select',{name:'method',required:true,defaultValue:available.length===1?available[0].id:''},h('option',{value:''},'Selecciona una versión'),...available.map(m=>h('option',{key:m.id,value:m.id},`${m.name} ${m.version_label}`)))),h(Button,{type:'submit',disabled:busy},busy?'Preparando…':'Iniciar cartilla')):
@@ -136,11 +138,12 @@ export function QAWorkspace({backend,profile,id,onChanged}:{backend:Backend;prof
   return h('div',{className:'qa-workspace'},header,h('div',{className:'qa-summary'},h('span',{className:'tag'},`${method.name} ${method.version_label}`),h('span',null,`Versión documental ${doc.version}`),h('span',null,`${completed} de ${included.length} casos aprobados`),h('span',{className:'qa-manual'},'Elaboración manual')),
     project.status==='archivado'&&h('div',{className:'notice info'},'Este proyecto está archivado y su cartilla se muestra en consulta. Reábrelo desde Información y equipo para modificarla.'),h(Alert,{message:error}),h(Alert,{message:success,success:true}),
     error&&h(Button,{variant:'secondary',disabled:busy,onClick:()=>{if(dirty&&!window.confirm('La recarga reemplazará los textos sin guardar. ¿Deseas continuar?'))return;setLoading(true);void load().then(()=>setError('')).catch(e=>setError(message(e))).finally(()=>setLoading(false));}},'Recargar cartilla'),
-    h('div',{className:'qa-tabs',role:'tablist','aria-label':'Elaboración de la cartilla'},...([['context','1. Contexto'],['selection','2. Selección'],['cases','3. Casos y pasos'],['matrix','Matriz'],['history','Historial']].map(([key,label])=>h('button',{type:'button',key,role:'tab','aria-selected':tab===key,disabled:busy||(dirty&&tab!==key),className:tab===key?'active':'',onClick:()=>{setTab(key);setError('');setSuccess('');}},label)))),
+    h('div',{className:'qa-tabs',role:'tablist','aria-label':'Elaboración de la cartilla'},...([['context','1. Contexto'],['selection','2. Selección'],['cases','3. Casos y pasos'],['matrix','Matriz'],['history','Historial'],...(actor.can_edit?[['ai','Asistente IA']]:[])].map(([key,label])=>h('button',{type:'button',key,role:'tab','aria-selected':tab===key,disabled:busy||(dirty&&tab!==key),className:tab===key?'active':'',onClick:()=>{setTab(key);setError('');setSuccess('');}},label)))),
     dirty&&h('p',{className:'small qa-unsaved',role:'status'},'Tienes cambios sin guardar. Guarda el borrador para cambiar de sección.'),
     tab==='context'&&h(ContextEditor,{key:doc.version,doc,actor,run,busy,onDirty:setDirty}),
     tab==='selection'&&h(SelectionEditor,{key:doc.version,doc,actor,method,run,busy,onDirty:setDirty}),
     tab==='cases'&&(doc.content.context.review.status!=='aprobado'||doc.content.selection.status!=='aprobado'?h('section',{className:'panel'},h(Empty,{title:'Aprueba primero el contexto y la selección',text:'El editor se habilita con el conjunto de casos revisado.'})):activeCase?h(CaseEditor,{key:`${activeCase}-${doc.version}`,doc,actor,method,caseId:activeCase,onNavigate:setCaseId,run,busy,onDirty:setDirty}):h('section',{className:'panel'},h(Empty,{title:'No hay casos incluidos',text:'Revisa la selección de casos.'}))),
     tab==='matrix'&&h('section',{className:'panel form-panel'},h('h2',null,'Vista previa de la matriz'),h('p',{className:'muted'},'Muestra el contenido guardado. Los estados de aprobación se consultan en cada caso.'),h(MatrixPreview,{content:doc.content,config:method.config})),
+    tab==='ai'&&actor.can_edit&&h(AIAssistant,{key:doc.version,backend,context:{project,document:doc,methodology:method},initialTask:assistantTask,caseId:activeCase,run}),
     tab==='history'&&h(DocumentHistory,{backend,id,method}));
 }

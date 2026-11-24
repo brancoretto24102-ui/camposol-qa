@@ -63,3 +63,11 @@ La matriz respeta once campos lógicos de la plantilla DigiProy, con Comentario 
 La RLS de aplicaciones permite activas, administración y aplicaciones de proyectos accesibles mediante un helper privado que solo devuelve un booleano. Esto evita un ciclo de políticas entre aplicaciones y proyectos. Los cuatro comandos públicos son SECURITY INVOKER; sus implementaciones privadas verifican autorización y tienen `search_path=''`. No se conceden mutaciones REST directas sobre documentos, revisiones ni metodologías.
 
 Detalles de implementación, migraciones aplicadas y uso: [Continuación de Fase 2](CONTINUACION_FASE_2.md).
+
+## Ampliación de Fase 3
+
+`src/ai-domain.ts` prepara prompts de datos guardados, valida la respuesta y construye comandos documentales normales. `src/features/ai.ts` presenta la preferencia personal, el texto exacto y la propuesta editable. No aprueba contenido. Los datos se guardan únicamente tras una revisión humana explícita y conservan el control de versiones de Fase 2.
+
+La modalidad manual abre enlaces oficiales sin transmitir el prompt. Las APIs propias utilizan `qa-ai`, autenticada con JWT y Auth; sus consultas respetan RLS del usuario. `ai_provider_preferences` contiene únicamente proveedor, modalidad, modelo y versión, con lectura propia. Los contadores privados limitan intentos y no guardan prompts ni credenciales. El transporte de cada proveedor tiene endpoint fijo, timeout y tamaño acotado, sin reintentos automáticos.
+
+Las claves se introducen por envío y viven en memoria; el frontend no llama directamente a los proveedores. Los adaptadores son independientes de OAuth y del perfil metodológico. Copilot conserva la modalidad manual; su futura API exige licencia y consentimiento organizacional. Detalle: [Continuación de Fase 3](CONTINUACION_FASE_3.md).

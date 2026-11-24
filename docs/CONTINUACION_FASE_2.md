@@ -69,4 +69,4 @@ Los pendientes manuales de Fase 1 siguen en [CONTINUACION_FASE_1.md](CONTINUACIO
 
 El analizador conserva el aviso previo de protección contra contraseñas filtradas deshabilitada. No se modificó Auth ni el plan para habilitarla. [Referencia oficial](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
 
-Antes de otra fase, revisar esta entrega con una cartilla y reglas reales aportadas por el usuario. No inventar funcionalidades ni casos y no incorporar IA, evidencias o exportaciones fuera de su fase sin una instrucción nueva.
+El usuario solicitó después implementar Fase 3. Su alcance y resultados están en `docs/CONTINUACION_FASE_3.md`. Revisar esta entrega con una cartilla y reglas reales aportadas por el usuario. No inventar funcionalidades ni casos y no incorporar IA, evidencias o exportaciones fuera de su fase sin una instrucción nueva.

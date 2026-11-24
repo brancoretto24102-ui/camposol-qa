@@ -1,8 +1,12 @@
+import type {AIPreferences,AIGenerateInput,AIResult} from './ai-domain.ts';
 import type { Application, AuditEvent, Member, Profile, Project, ProjectInput, Role } from './domain.ts';
 import type { MethodologyInput, MethodologyVersion, QACommand, QADocument, QAProgress, QARevision } from './qa-domain.ts';
 export interface BackendInfo { mode:'local'|'supabase'; bootstrap_required:boolean; microsoft_enabled:boolean; google_enabled:boolean }
 export interface AccountInput { full_name:string; email:string; password:string; role?:Role }
 export interface Backend {
+  aiPreferences():Promise<AIPreferences>;
+  saveAIPreferences(input:AIPreferences):Promise<AIPreferences>;
+  aiGenerate(input:AIGenerateInput):Promise<AIResult>;
   info():Promise<BackendInfo>; session():Promise<Profile|null>;
   signIn(email:string,password:string):Promise<void>; signUp(input:AccountInput):Promise<string>;
   bootstrap(input:AccountInput):Promise<void>; logout():Promise<void>; oauth(provider:'azure'|'google'):Promise<void>;
@@ -29,6 +33,9 @@ export class LocalBackend implements Backend {
     const response=await fetch(`/api${path}`,{method,credentials:'same-origin',headers:{'Content-Type':'application/json',...(this.csrf?{'X-CSRF-Token':this.csrf}:{})},...(body!==undefined?{body:JSON.stringify(body)}:{})});
     const value=await response.json();if(!response.ok)throw new Error(value.error??'No fue posible completar la operación.');return value as T;
   }
+  aiPreferences(){return this.request<AIPreferences>('/ai/preferences');}
+  saveAIPreferences(input:AIPreferences){return this.request<AIPreferences>('/ai/preferences','PUT',input);}
+  aiGenerate(input:AIGenerateInput){return this.request<AIResult>('/ai/generate','POST',input);}
   info(){return this.request<BackendInfo>('/info');}
   async session(){const r=await this.request<{user:Profile|null;csrf:string}>('/session');this.csrf=r.csrf;return r.user;}
   async signIn(email:string,password:string){const r=await this.request<{csrf:string}>('/login','POST',{email,password});this.csrf=r.csrf;}

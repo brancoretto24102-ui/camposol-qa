@@ -5,6 +5,7 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { validateProject, roles } from '../src/domain.ts';
 import { QAStore } from './qa-store.mjs';
+import { AIStore } from './ai-store.mjs';
 
 const derive = promisify(scrypt);
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -33,7 +34,7 @@ export class Store {
       CREATE INDEX IF NOT EXISTS members_user_idx ON project_members(user_id);
       CREATE TABLE IF NOT EXISTS audit_logs(id TEXT PRIMARY KEY,actor_id TEXT REFERENCES users(id),project_id TEXT REFERENCES projects(id),action TEXT NOT NULL,entity_id TEXT,details TEXT NOT NULL,created_at TEXT NOT NULL);
       INSERT OR IGNORE INTO applications(id,name) VALUES('digiproy','DigiProy');`);
-    this.qa=new QAStore(this);
+    this.qa=new QAStore(this);this.ai=new AIStore(this);
   }
   close(){this.db.close();}
   transaction(fn){this.db.exec('BEGIN IMMEDIATE');try{const r=fn();this.db.exec('COMMIT');return r;}catch(e){this.db.exec('ROLLBACK');throw e;}}

@@ -30,7 +30,7 @@ export function createApp({store=new Store(resolve(root,process.env.QA_DATA_DIR?
       const mutate=!['GET','HEAD'].includes(req.method);
       if(mutate){if(!allowedOrigins.includes(req.headers.origin))throw new AppError(403,'Origen no autorizado.');if(!req.headers['content-type']?.startsWith('application/json'))throw new AppError(415,'Se requiere contenido JSON.');}
       if(path==='/api/info'&&req.method==='GET')return send(res,200,store.info());
-      if(path==='/api/health'&&req.method==='GET')return send(res,200,{ok:true,mode:'local',phase:2});
+      if(path==='/api/health'&&req.method==='GET')return send(res,200,{ok:true,mode:'local',phase:3});
       const cookie=(req.headers.cookie??'').split(';').map(x=>x.trim()).find(x=>x.startsWith('qa_session='))?.slice(11);
       const auth=store.session(cookie);
       if(path==='/api/session'&&req.method==='GET')return send(res,200,auth??{user:null,csrf:''});
@@ -44,6 +44,9 @@ export function createApp({store=new Store(resolve(root,process.env.QA_DATA_DIR?
       if(mutate&&!equal(req.headers['x-csrf-token'],auth.csrf))throw new AppError(403,'La solicitud no pasó la validación de sesión. Recarga la página.');
       const user=auth.user;
       if(path==='/api/logout'&&req.method==='POST'){store.logout(cookie);res.setHeader('Set-Cookie','qa_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');return send(res,200,{ok:true});}
+      if(path==='/api/ai/preferences'&&req.method==='GET')return send(res,200,store.ai.preferences(user));
+      if(path==='/api/ai/preferences'&&req.method==='PUT')return send(res,200,store.ai.savePreferences(user,await body(req)));
+      if(path==='/api/ai/generate'&&req.method==='POST')return send(res,200,await store.ai.generate(user,await body(req,280_000)));
       if(path==='/api/applications'&&req.method==='GET')return send(res,200,store.applications(user));
       if(path==='/api/applications'&&req.method==='PUT')return send(res,200,store.qa.saveApplication(user,await body(req)));
       if(path==='/api/qa/methodologies'&&req.method==='GET')return send(res,200,store.qa.methodologies(user));
