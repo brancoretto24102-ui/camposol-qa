@@ -4,7 +4,7 @@ Aplicación con Fase 2 manual: proyectos, aplicaciones, metodología DigiProy 1.
 
 URL pública: **https://brancoretto24102-ui.github.io/camposol-qa/**. Cualquier persona puede abrir el acceso; los proyectos requieren una cuenta confirmada, activada y autorizada. Se conserva el repositorio público y el backend independiente `camposol-qa-dev`, proyecto Supabase `frhmxbdombsqubqlchkj`.
 
-**Verificación de Fase 2:** 40 pruebas locales y 44 comprobaciones RLS remotas superadas, compilación local/Supabase correcta. Las comprobaciones remotas se revirtieron sin modificar la cuenta y el proyecto existentes. Estado de publicación y revisión de interfaz: [verificación de Fase 2](docs/VERIFICACION_FASE_2.md).
+**Verificación de Fase 2:** 40 pruebas locales y 44 comprobaciones RLS remotas superadas, compilación local/Supabase correcta y auditoría sin vulnerabilidades informadas. GitHub Pages publicó el código `b8f9834a69d29abb6d4863c3d0b605189e3c4e2a` y ambos flujos terminaron correctamente. Editor, matriz e historial revisados con datos ficticios locales en escritorio y a 390 px. Las comprobaciones remotas se revirtieron sin modificar la cuenta y el proyecto existentes. Estado de publicación y revisión de interfaz: [verificación de Fase 2](docs/VERIFICACION_FASE_2.md).
 
 Para utilizar la entrega y continuar el proyecto: [Continuación de Fase 2](docs/CONTINUACION_FASE_2.md). La segunda cuenta y la recuperación real de Fase 1 siguen pendientes; su registro se conserva en [Continuación de Fase 1](docs/CONTINUACION_FASE_1.md). IA, evidencias y Excel corresponden a las fases siguientes.
 
@@ -46,7 +46,7 @@ El flujo `.github/workflows/pages.yml` publica la interfaz desde `main` y permit
 
 La configuración usa las variables de repositorio `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`; contienen la URL y la clave **publicable** del backend existente, nunca claves de servicio. El flujo comprueba el proyecto y exige una clave `sb_publishable_` antes de compilar. El job de publicación usa `pages: write` e `id-token: write`; el acceso al contenido permanece en `contents: read`.
 
-El commit publicado `9d188a0149b50a4bf295d02d1b85b26035936131` pasó la [publicación 45254640994](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45254640994) y la [verificación 45254641095](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45254641095). Se observó la sesión administradora real en esta URL. La publicación anterior de Sites permanece documentada como referencia.
+El commit de la publicación inicial de Fase 1 `9d188a0149b50a4bf295d02d1b85b26035936131` pasó la [publicación 45254640994](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45254640994) y la [verificación 45254641095](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45254641095). Se observó la sesión administradora real en esta URL. La publicación anterior de Sites permanece documentada como referencia.
 
 ## Supabase existente
 

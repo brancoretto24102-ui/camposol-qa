@@ -4,7 +4,7 @@ Actualizado para Fase 2 el 23 de noviembre de 2026. Fuente funcional: PROMPT MAE
 
 ## Fundamentos de Fase 1
 
-Acceso por correo, cierre de sesión, recuperación local, roles administrador/editor/revisor/lector, tablero, alta/edición/listado/recuperación de proyectos, miembros y auditoría. Los casos, aprobaciones documentales, evidencias, IA y Excel se implementan en las fases posteriores del prompt. Ninguna cifra simula casos aprobados.
+Acceso por correo, cierre de sesión, recuperación local, roles administrador/editor/revisor/lector, tablero, alta/edición/listado/recuperación de proyectos, miembros y auditoría. La Fase 2 añadió los casos y las aprobaciones documentales descritos más abajo; evidencias, IA y Excel quedan para las fases siguientes. Ninguna cifra simula casos aprobados.
 
 ## Aislamiento
 
@@ -18,7 +18,7 @@ Supabase se prioriza por la disponibilidad de un proyecto Free independiente y l
 
 ## Identidad y permisos
 
-La autorización se resuelve en el servidor/base de datos, no solo ocultando controles. Un proyecto pertenece a su creador y solo es visible para sus miembros y administradores. Un enlace no añade permisos. Un editor puede crear proyectos y modificar los que posee o tiene asignados como editor. Revisores y lectores no modifican el contenido en esta fase. Solo el administrador gestiona perfiles y miembros. Deshabilitar una cuenta o cambiar su rol revoca sesiones locales. No se permite deshabilitar al último administrador.
+La autorización se resuelve en el servidor/base de datos, no solo ocultando controles. Un proyecto pertenece a su creador y solo es visible para sus miembros y administradores. Un enlace no añade permisos. Un editor puede crear proyectos y modificar los que posee o tiene asignados como editor. Revisores y lectores no editan el contenido; la ampliación de Fase 2 habilita la revisión por el revisor asignado. Solo el administrador gestiona perfiles y miembros. Deshabilitar una cuenta o cambiar su rol revoca sesiones locales. No se permite deshabilitar al último administrador.
 
 El alta inicial del administrador local solo funciona antes de existir usuarios, dentro de una transacción. El backend remoto no promociona automáticamente a la primera persona que se registra: requiere activar su perfil y asignar el primer administrador mediante el canal administrativo del proyecto. Nunca se confía en user_metadata para roles.
 
@@ -36,7 +36,7 @@ Microsoft usa el proveedor oficial Azure de Supabase con scope email. Falta regi
 
 ## Modelo inicial
 
-user_profiles → roles y activación; applications → catálogo; projects → creador, aplicación, cartilla, objetivo y versión; project_members → pertenencia y rol; audit_logs → cambios trazables. SQLite añade users, sessions y password_resets para el entorno local. Supabase usa auth.users y Auth para esas responsabilidades. Metodologías versionadas y entidades de casos se incorporarán en Fase 2, sin inventar su contenido.
+user_profiles → roles y activación; applications → catálogo; projects → creador, aplicación, cartilla, objetivo y versión; project_members → pertenencia y rol; audit_logs → cambios trazables. SQLite añade users, sessions y password_resets para el entorno local. Supabase usa auth.users y Auth para esas responsabilidades. La ampliación de Fase 2 incorpora metodologías versionadas y entidades de casos dentro del agregado documental descrito más abajo.
 
 ## Publicación vigente
 

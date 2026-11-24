@@ -6,7 +6,7 @@ Actualizado el 23/11/2026, hora de Perú. El usuario solicitó expresamente cont
 
 Motor manual: aplicaciones, perfiles de metodología versionados, cartillas, información y funcionalidades, selección de casos, aprobación de cada etapa, editor de casos y pasos, vista previa de matriz e historial documental. Inicio y listado muestran el avance calculado de los registros guardados.
 
-La URL principal sigue siendo https://brancoretto24102-ui.github.io/camposol-qa/ . El despliegue de este código se verifica por el flujo existente de Pages; los resultados concretos quedan en [VERIFICACION_FASE_2.md](VERIFICACION_FASE_2.md).
+La URL principal sigue siendo https://brancoretto24102-ui.github.io/camposol-qa/ . Código publicado `b8f9834a69d29abb6d4863c3d0b605189e3c4e2a`; publicación y verificación de GitHub completadas correctamente. La interfaz se revisó en escritorio y a 390 px con datos ficticios locales; los resultados concretos quedan en [VERIFICACION_FASE_2.md](VERIFICACION_FASE_2.md).
 
 ## Uso
 
