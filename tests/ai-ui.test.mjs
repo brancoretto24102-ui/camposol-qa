@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createElement as h} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {AIRequestFeedback} from '../src/features/ai-feedback.ts';
+import {FreeChatProposalIssue} from '../src/features/free-chat-feedback.ts';
 
 const render=(state,error='')=>renderToStaticMarkup(h(AIRequestFeedback,{state,error}));
 
@@ -20,4 +21,11 @@ test('una respuesta recibida no vuelve al estado inicial y sus errores de valida
 });
 test('solo una consulta sin iniciar muestra la invitación a generar',()=>{
   const html=render('idle');assert.match(html,/Generar con IA/);assert.match(html,/role="status"/);assert.doesNotMatch(html,/role="alert"/);
+});
+test('el chat ofrece preparar una corrección y explica que enviarla utiliza otra consulta',()=>{
+  const html=renderToStaticMarkup(h(FreeChatProposalIssue,{error:'La cita no coincide con el requisito.',busy:false,onRepair:()=>{}}));
+  assert.match(html,/role="alert"/);assert.match(html,/Preparar corrección/);assert.match(html,/otra consulta/);assert.match(html,/La cita no coincide/);
+  assert.doesNotMatch(html,/Guardar propuesta|<details open/);
+  const busy=renderToStaticMarkup(h(FreeChatProposalIssue,{error:'Cita inválida',busy:true,onRepair:()=>{}}));assert.match(busy,/<button[^>]*disabled/);
+  assert.equal(renderToStaticMarkup(h(FreeChatProposalIssue,{error:'',busy:false,onRepair:()=>{}})),'');
 });

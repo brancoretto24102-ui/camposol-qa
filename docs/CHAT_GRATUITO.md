@@ -1,6 +1,24 @@
 # Chat gratuito integrado de Camposol QA
 
-Actualizado el 24/11/2026, hora de Perú. El usuario eligió priorizar un chat integrado gratuito para las cuentas autorizadas de Camposol QA, con otro proveedor. Se conserva el repositorio, GitHub Pages y el backend Supabase existentes.
+Actualizado el 25/11/2026, hora de Perú. El usuario eligió priorizar un chat integrado gratuito para las cuentas autorizadas de Camposol QA, con otro proveedor. Se conserva el repositorio, GitHub Pages y el backend Supabase existentes.
+
+## Corrección de propuestas sin citas — 25/11/2026
+
+La captura del usuario muestra una respuesta de conversación recibida y una propuesta rechazada porque su cita no satisface la validación: debe contener al menos ocho caracteres normalizados y existir en los requisitos admitidos para esa tarea. Ese rechazo no guarda la propuesta. La captura no permite determinar si la cita exacta faltaba, era demasiado corta o no coincidía; el mensaje anterior agrupaba esas posibilidades.
+
+Se encontraron dos debilidades: el transporte pedía únicamente un objeto JSON, sin exigir los campos de cada propuesta, y el historial perdía el motivo del rechazo. Además, las instrucciones de citas no distinguían las fuentes admitidas por tarea. No se desactivó la comprobación literal ni se completaron citas por suposición.
+
+La corrección usa `response_format.type=json_schema` y `strict=true`, documentados para el mismo modelo `openai/gpt-oss-20b`. Se reutiliza el formato canónico de cada tarea para exigir sus campos, incluyendo `source_quote`, con objetos cerrados y `proposal` nullable. Las instrucciones especifican ocho caracteres literales, las secciones válidas por tarea y la respuesta de aclaración con `proposal:null` cuando falte sustento. El esquema exige estructura; la longitud, pertenencia de las citas, permisos y coherencia documental siguen comprobándose en el servidor.
+
+El historial ahora incluye `validation_error` cuando una propuesta fue rechazada. La interfaz ofrece **Preparar corrección**: completa un mensaje que el usuario revisa y envía. Se informa de que utiliza otra consulta de la cuota gratuita. No se realiza un reintento automático ni se guarda una propuesta sin revisión humana.
+
+Comprobación local: 109 pruebas superadas, incluidas una selección con cita inválida, su corrección en una segunda consulta explícita y la comprobación de que ninguna respuesta cambia la cartilla hasta ejecutar el guardado. También se comprobaron citas ausentes, cortas e inventadas, esquema por tarea, preservación del motivo del rechazo y presentación de la recuperación. Ambas compilaciones y TypeScript correctos. No se añadieron dependencias, tablas, roles ni cambios a las cuotas o secretos.
+
+Backend actualizado en el proyecto existente: `qa-ai` versión **6**, ACTIVE, `verify_jwt=true`, artefacto `944ee2827583811d8d4bc3bab94a20812e18aa1629d804e6d11046182726ff85`. Se comparó con la versión remota anterior: únicamente cambiaron el contrato del chat y su transporte. Las rutas de API personal, la autenticación y los permisos conservaron su código.
+
+La conexión al navegador local no estuvo disponible en esta continuación. No se recargó la pestaña del usuario ni se reenviaron sus requisitos. La prueba con transporte simulado no se presenta como una generación nueva de Groq. Tras publicarse, la siguiente consulta autorizada desde la página comprobará la respuesta real del proveedor con el nuevo contrato. La conversación es temporal; guardar las ediciones de la cartilla antes de recargar.
+
+Referencias primarias: [Groq — Structured Outputs](https://console.groq.com/docs/structured-outputs). El historial de verificación y activación que sigue corresponde a la implementación inicial.
 
 ## Funcionamiento
 
@@ -14,7 +32,7 @@ Se comprueban perfil activo, acceso de edición, proyecto, etapa y versión ante
 
 ## Activación del administrador
 
-**Conexión activada y comprobada el 24/11/2026.** Se observó «Free · $0» en la consola oficial y el administrador introdujo la credencial directamente en los secretos de Supabase, sin compartirla por este chat. No se contrató un plan de pago ni se agregó una tarjeta. Los siguientes pasos quedan como referencia para mantener o reemplazar la conexión; no repetir la creación de una clave para utilizar el servicio ya activo.
+La interfaz y el servidor quedan preparados, pero la disponibilidad será falsa hasta configurar la conexión real. No presentar pruebas simuladas como una conexión activada.
 
 1. Crear o utilizar una organización **Free** de [GroqCloud](https://console.groq.com/). Mantenerla en Free, sin contratar Developer ni configurar un método de pago para esta conexión.
 2. Crear una clave dedicada a Camposol QA directamente en GroqCloud. No enviarla por chat, guardarla en el repositorio ni introducirla en un formulario de la aplicación pública.
@@ -30,7 +48,7 @@ Esta credencial administrada es distinta de las claves personales temporales de 
 
 - Se reutiliza `qa-ai`: acción `free_status` para disponibilidad autenticada y acción `chat` para conversar. Las solicitudes anteriores de API propia conservan su contrato.
 - Endpoint fijo: `https://api.groq.com/openai/v1/chat/completions`.
-- Modelo fijo: `openai/gpt-oss-20b`; modo JSON interno, sin herramientas y sin razonamiento expuesto.
+- Modelo fijo: `openai/gpt-oss-20b`; esquema JSON estricto por tarea, sin herramientas y sin razonamiento expuesto.
 - Contexto revisable de hasta 12.000 caracteres; mensaje de hasta 2.000; contexto, mensaje e historial de hasta 18.000 en conjunto. Se conservan como máximo cuatro pares recientes completos para enviar. Si el último par aún excede el tamaño, se informa del límite sin enviar ni truncar datos a escondidas.
 - Salida de hasta 2.048 tokens, conexión de 50 segundos y respuesta HTTP de hasta 200 KB. Se rechazan respuestas truncadas, vacías, con herramientas o sin el contrato de chat esperado.
 - Las propuestas se validan con las mismas reglas documentales, citas literales, campos y prioridades de Fase 3. Una propuesta inválida queda bloqueada; el mensaje de conversación se conserva para solicitar una corrección.
@@ -43,19 +61,7 @@ No se añaden tablas, migraciones, dependencias, roles ni políticas alternativa
 
 88 pruebas locales superadas: 73 existentes y 15 de chat. Incluyen permisos, sesión, CSRF, consentimiento, contexto y etapas, límites e historial, configuración inactiva, transporte fijo, ausencia de secretos, errores de cuota, propuestas inválidas, revisión y borrador. Compilaciones local y Supabase y ambos chequeos de tipos correctos. Edge Function `qa-ai` versión 4, ACTIVE y JWT obligatorio, desplegada en el proyecto existente; huella del artefacto `76a27f53029e5f16c1946a4bc26149113626664d6022dc263efdc833d45bddaa`.
 
-Código publicado: [`df0dfd7611354e042dad45b1182a86913339bfd2`](https://github.com/brancoretto24102-ui/camposol-qa/commit/df0dfd7611354e042dad45b1182a86913339bfd2). [Verificación 45345747958](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45345747958) y [Pages 45345747988](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45345747988): ambos `completed/success`. La página y su JavaScript públicos devolvieron HTTP 200; después del despliegue, una solicitud sin JWT devolvió 401 y el preflight autorizado devolvió 204.
-
-Se comprobó la conexión real en GitHub Pages con la cartilla exclusivamente ficticia `QA-F3-FREE-001`:
-
-1. Disponibilidad autenticada positiva. El contexto revisable contenía solo la regla ficticia de esa cartilla.
-2. Primer mensaje respondido por Groq en la propia página. Segundo mensaje en la misma conversación: propuesta válida con una funcionalidad y cita literal, sin copiar JSON ni abrir un chatbot.
-3. Edición de la descripción propuesta. Guardado deshabilitado antes de marcar la revisión y habilitado después de marcarla.
-4. Guardado mediante el comando documental existente y recarga: documento versión 3, contexto en borrador, una funcionalidad con su identificador previo y tres revisiones persistidas. No hubo aprobación automática.
-5. Proyecto técnico archivado en versión 2; documento e historial conservados. Se comprobó que su asistente ya no permite editarlo.
-
-Se volvió a la cartilla de trabajo y se observó «Chat gratuito disponible · Groq», sin mensajes y con la autorización desmarcada. No se enviaron sus requisitos al proveedor ni se modificó su contenido. Tampoco se cambiaron las preferencias personales de la otra IA.
-
-La comprobación real cubre conversación y análisis; las demás tareas conservan sus verificaciones automatizadas y sus requisitos de etapa. La cuota Free sigue siendo compartida y limitada. Mantener la conexión en Free y comprobar el servicio si cambia su configuración.
+Pendientes de cierre: configurar una clave de una organización Free, comprobar disponibilidad real y probar una conversación y propuesta en la URL pública sin introducir datos empresariales. Hasta entonces no afirmar que se realizó una generación real ni que la conexión está activada.
 
 ## Sign in with ChatGPT
 

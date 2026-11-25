@@ -6,7 +6,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {Store} from '../server/store.mjs';
 import {createApp} from '../server/index.mjs';
 import {aiProposalCommand} from '../src/ai-domain.ts';
-import {buildChatSource,validateChatInput,parseChatResult,chatHistoryWindow,CHAT_SOURCE_LIMIT,CHAT_TOTAL_LIMIT,CHAT_OUTPUT_TOKENS,FREE_CHAT_MODEL} from '../src/ai-chat-domain.ts';
+import {buildChatSource,validateChatInput,parseChatResult,chatHistoryWindow,chatHistoryForTurns,chatInstructions,chatResponseFormat,CHAT_REPAIR_MESSAGE,CHAT_SOURCE_LIMIT,CHAT_TOTAL_LIMIT,CHAT_OUTPUT_TOKENS,FREE_CHAT_MODEL} from '../src/ai-chat-domain.ts';
 import {callFreeChat,freeChatStatus} from '../supabase/functions/_shared/ai-free-chat.ts';
 import {createAIHandler} from '../supabase/functions/_shared/ai-handler.ts';
 import {FreeChatAvailability} from '../src/features/free-chat-status.ts';
@@ -59,7 +59,7 @@ test('Groq usa endpoint y modelo fijos, clave solo en cabecera y conversación s
   const f=await fixture(t),input=f.input();input.history=[{role:'user',content:'Pregunta previa'},{role:'assistant',content:JSON.stringify(reply)}];let calls=0;
   const result=await callFreeChat(input,f.config,async(url,init)=>{
     calls++;assert.equal(url,'https://api.groq.com/openai/v1/chat/completions');assert.equal(init.headers.Authorization,`Bearer ${f.config.key}`);assert.equal(init.redirect,'error');assert.ok(init.signal);
-    const body=JSON.parse(init.body);assert.equal(body.model,FREE_CHAT_MODEL);assert.equal(body.max_completion_tokens,CHAT_OUTPUT_TOKENS);assert.equal(body.include_reasoning,false);assert.equal(body.reasoning_effort,'low');assert.deepEqual(body.response_format,{type:'json_object'});assert.equal('tools' in body,false);
+    const body=JSON.parse(init.body);assert.equal(body.model,FREE_CHAT_MODEL);assert.equal(body.max_completion_tokens,CHAT_OUTPUT_TOKENS);assert.equal(body.include_reasoning,false);assert.equal(body.reasoning_effort,'low');assert.equal(body.response_format.type,'json_schema');assert.equal(body.response_format.json_schema.strict,true);assert.equal('tools' in body,false);
     assert.equal(JSON.stringify(body).includes(f.config.key),false);assert.equal(body.messages.at(-1).content,input.message);assert.deepEqual(body.messages.slice(2,-1),input.history);return completion(reply);
   });assert.equal(calls,1);assert.equal(result.text,JSON.stringify(reply));assert.equal(result.input_tokens,20);assert.equal(JSON.stringify(result).includes(f.config.key),false);
 });
@@ -82,6 +82,46 @@ test('el chat admite conversación normal y mantiene las propuestas sin aprobaci
 test('una propuesta inventada o con aprobaciones queda rechazada sin perder el mensaje del chat',async t=>{
   const f=await fixture(t);for(const mutate of [p=>p.functionalities[0].source_quote='Regla que no aparece en la fuente',p=>p.approved_by=f.admin.id]){const p=f.proposal();mutate(p);const result=parseChatResult({text:JSON.stringify({reply:'Revisa estos puntos.',proposal:p}),input_tokens:null,output_tokens:null},f.context(),{task:'analysis'});assert.equal(result.proposal,null);assert.ok(result.validation_error);assert.equal(result.reply,'Revisa estos puntos.');}
   for(const value of [[],{reply:'Hola'},{reply:'Hola',proposal:null,api_key:secret()},{reply:'',proposal:null}])assert.throws(()=>parseChatResult({text:JSON.stringify(value),input_tokens:null,output_tokens:null},f.context(),{task:'analysis'}));
+});
+test('el contrato estricto exige citas y campos completos sin ampliar permisos en ninguna tarea',()=>{
+  for(const task of ['analysis','selection','coverage','generate_case','improve_case','shorten_case','arguments','results']){
+    const format=chatResponseFormat({task}),schema=format.json_schema.schema;
+    assert.deepEqual(schema.required,['reply','proposal']);assert.equal(schema.additionalProperties,false);
+    const proposal=schema.properties.proposal.anyOf[0];assert.deepEqual(proposal.properties.kind.enum,[task==='analysis'?'analysis':task==='selection'?'selection':task==='coverage'?'coverage':'case']);
+    const item=task==='analysis'?proposal.properties.functionalities.items:task==='selection'?proposal.properties.cases.items:task==='coverage'?proposal.properties.gaps.items:proposal.properties.case.properties.steps.items;
+    assert.ok(item.required.includes('source_quote'));assert.equal(item.additionalProperties,false);assert.match(item.properties.source_quote.description,/8 caracteres/);
+    assert.deepEqual(schema.properties.proposal.anyOf[1],{type:'null'});assert.equal('approved_by' in proposal.properties,false);
+  }
+  assert.match(chatInstructions({task:'analysis'}),/contexto.source_notes/);assert.match(chatInstructions({task:'selection'}),/funcionalidad identificada por functionality_id/);
+  assert.match(chatInstructions({task:'selection'}),/validation_error/);assert.match(chatInstructions({task:'selection'}),/8 caracteres/);
+});
+test('una cita ausente, corta o ajena no se completa ni se convierte en una propuesta aplicable',async t=>{
+  const f=await fixture(t),before=f.doc.version;
+  for(const quoteValue of [undefined,'','corta','Un requisito inventado que no está en la cartilla']){
+    const candidate=f.proposal();candidate.functionalities[0].source_quote=quoteValue;
+    const result=parseChatResult({text:JSON.stringify({reply:'Preparé la propuesta.',proposal:candidate}),input_tokens:1,output_tokens:1},f.context(),{task:'analysis'});
+    assert.equal(result.proposal,null);assert.ok(result.validation_error);assert.equal(result.reply,'Preparé la propuesta.');
+  }
+  assert.equal(f.doc.version,before);
+});
+test('la corrección de una selección conserva el rechazo en el historial y solo se guarda con una acción explícita',async t=>{
+  const f=await fixture(t);f.prepare();const before=f.doc.version;
+  const input={...f.input(),task:'selection',prompt:buildChatSource(f.context(),{task:'selection'}),message:'Prepara una propuesta para la tarea seleccionada.'};
+  const candidate={kind:'selection',cases:[{functionality_id:f.fid,name:'Registrar el dato',justification:quote,priority:'Alta',source_quote:'guardar'}],questions:[]};
+  let calls=0;
+  const rejected=await f.store.ai.chat(f.editor,input,async()=>{calls++;return completion({reply:'Se presenta la propuesta de selección.',proposal:candidate});},f.config);
+  assert.equal(calls,1);assert.equal(rejected.proposal,null);assert.ok(rejected.validation_error);assert.equal(f.doc.version,before);
+  const turns=[{role:'user',content:input.message},{role:'assistant',content:rejected.reply,proposal:rejected.proposal,validation_error:rejected.validation_error}];
+  const history=chatHistoryForTurns(turns),feedback=JSON.parse(history[1].content);
+  assert.equal(feedback.validation_error,rejected.validation_error);assert.equal(feedback.proposal,null);assert.equal('cases' in feedback,false);
+  const corrected=await f.store.ai.chat(f.editor,{...input,message:CHAT_REPAIR_MESSAGE,history},async(_url,init)=>{
+    calls++;const messages=JSON.parse(init.body).messages;
+    assert.equal(JSON.parse(messages.at(-2).content).validation_error,rejected.validation_error);
+    return completion({reply:'Corregí las citas de la propuesta.',proposal:{...candidate,cases:[{...candidate.cases[0],source_quote:quote}]}});
+  },f.config);
+  assert.equal(calls,2);assert.equal(corrected.validation_error,undefined);assert.equal(corrected.proposal.kind,'selection');assert.equal(f.doc.version,before);
+  f.apply(f.editor,aiProposalCommand(corrected.proposal,f.context(),{task:'selection'},randomUUID));
+  assert.equal(f.doc.version,before+1);assert.equal(f.doc.content.selection.status,'requiere_correccion');assert.equal(f.doc.content.cases.length,2);
 });
 test('permisos, cuenta activa y versión se comprueban antes de llamar al chat compartido',async t=>{
   const f=await fixture(t);let calls=0;const fetcher=async()=>{calls++;return completion(reply);};

@@ -1,4 +1,4 @@
-import {chatInstructions,FREE_CHAT_MODEL,CHAT_OUTPUT_TOKENS,type AIChatInput,type FreeChatStatus,type ChatTransportResult} from '../../../src/ai-chat-domain.ts';
+import {chatInstructions,chatResponseFormat,FREE_CHAT_MODEL,CHAT_OUTPUT_TOKENS,type AIChatInput,type FreeChatStatus,type ChatTransportResult} from '../../../src/ai-chat-domain.ts';
 import {QAError} from '../../../src/qa-domain.ts';
 
 export interface FreeChatConfig {key:string;freePlanConfirmed:boolean}
@@ -13,7 +13,7 @@ export async function callFreeChat(input:AIChatInput,config:FreeChatConfig,fetch
   try{
     const response=await fetcher('https://api.groq.com/openai/v1/chat/completions',{method:'POST',redirect:'error',signal:controller.signal,headers,
       body:JSON.stringify({model:FREE_CHAT_MODEL,messages:[{role:'system',content:chatInstructions(input)},{role:'user',content:`CONTEXTO REVISADO\n${input.prompt}\nFIN DE CONTEXTO`},...input.history,{role:'user',content:input.message}],
-        response_format:{type:'json_object'},stream:false,max_completion_tokens:CHAT_OUTPUT_TOKENS,reasoning_effort:'low',include_reasoning:false})});
+        response_format:chatResponseFormat(input),stream:false,max_completion_tokens:CHAT_OUTPUT_TOKENS,reasoning_effort:'low',include_reasoning:false})});
     if(!response.ok){await response.body?.cancel();
       if(response.status===429)throw new QAError(429,'Se alcanzó la cuota gratuita compartida de Groq o un límite temporal. Espera al restablecimiento antes de volver a enviar. No se cambió a un servicio de pago.');
       if(response.status===401||response.status===403)throw new QAError(503,'El administrador debe revisar la conexión del chat gratuito con Groq.');

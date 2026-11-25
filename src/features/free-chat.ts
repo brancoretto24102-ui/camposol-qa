@@ -2,33 +2,33 @@ import {createElement as h,useEffect,useRef,useState,type ChangeEvent,type FormE
 import type {Backend} from '../backend.ts';
 import type {QADocument,QACommand} from '../qa-domain.ts';
 import {aiTasks,aiProposalCommand,type AIContext,type AITask,type AITarget,type AIProposal} from '../ai-domain.ts';
-import {buildChatSource,validateChatInput,chatHistoryWindow,CHAT_MESSAGE_LIMIT,CHAT_SOURCE_LIMIT,type ChatMessage} from '../ai-chat-domain.ts';
+import {buildChatSource,validateChatInput,chatHistoryForTurns,chatHistoryWindow,CHAT_MESSAGE_LIMIT,CHAT_SOURCE_LIMIT,CHAT_REPAIR_MESSAGE,type ChatTurn} from '../ai-chat-domain.ts';
 import {Alert,Button} from '../ui.ts';
 import {message} from '../forms.ts';
 import {QAField} from './qa-common.ts';
 import {ProposalEditor} from './ai.ts';
 import {useFreeChatStatus,FreeChatAvailability} from './free-chat-status.ts';
+import {FreeChatProposalIssue} from './free-chat-feedback.ts';
 
-interface Turn {role:'user'|'assistant';content:string;proposal?:AIProposal|null}
 export function FreeAIChat({backend,context,initialTask,caseId,run,onBusy}:{backend:Backend;context:AIContext;initialTask:AITask;caseId?:string;run:(command:QACommand)=>Promise<QADocument>;onBusy?:(busy:boolean)=>void}){
   const service=useFreeChatStatus(backend),cases=context.document.content.cases.filter(c=>c.included);
   const [task,setTask]=useState<AITask>(initialTask),[selectedCase,setSelectedCase]=useState(caseId??cases[0]?.id??''),[prepared,setPrepared]=useState<{context:AIContext;target:AITarget}|null>(null),
-    [source,setSource]=useState(''),[turns,setTurns]=useState<Turn[]>([]),[draft,setDraft]=useState(''),[pending,setPending]=useState(''),[consent,setConsent]=useState(false),[busy,setBusy]=useState(false),
+    [source,setSource]=useState(''),[turns,setTurns]=useState<ChatTurn[]>([]),[draft,setDraft]=useState(''),[pending,setPending]=useState(''),[consent,setConsent]=useState(false),[busy,setBusy]=useState(false),
     [error,setError]=useState(''),[success,setSuccess]=useState(''),[proposal,setProposal]=useState<AIProposal|null>(null),[reviewed,setReviewed]=useState(false);
   const bottom=useRef<HTMLDivElement|null>(null),caseTask=!['analysis','selection','coverage'].includes(task);
+  const lastTurn=turns.at(-1),validationIssue=!proposal&&lastTurn?.role==='assistant'?lastTurn.validation_error??'':'';
   function clearConversation(){setTurns([]);setDraft('');setPending('');setProposal(null);setReviewed(false);setConsent(false);setError('');setSuccess('');}
   useEffect(()=>{clearConversation();try{const target={task,...(caseTask?{case_id:selectedCase}:{})},snapshot=structuredClone(context);setSource(buildChatSource(snapshot,target));setPrepared({context:snapshot,target});}catch(e){setPrepared(null);setSource('');setError(message(e));}},[context.project.id,context.document.version,task,selectedCase]);
   useEffect(()=>{onBusy?.(busy);},[busy,onBusy]);
   useEffect(()=>{bottom.current?.scrollIntoView({block:'nearest'});},[turns,pending]);
   async function send(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!prepared)return;setError('');setSuccess('');
     try{
-      const history:ChatMessage[]=turns.map(t=>({role:t.role,content:t.role==='assistant'?JSON.stringify({reply:t.content,proposal:t.proposal??null}):t.content}));
+      const history=chatHistoryForTurns(turns);
       const input=validateChatInput({...prepared.target,project_id:context.project.id,version:prepared.context.document.version,prompt:source,message:draft,history:chatHistoryWindow(history,source,draft),consent});
       if(!service.status?.enabled)throw new Error('El administrador debe activar el chat gratuito antes de enviar consultas.');
       setBusy(true);setPending(input.message);setProposal(null);setReviewed(false);
       const result=await backend.aiChat(input);
-      setTurns([...turns,{role:'user',content:input.message},{role:'assistant',content:result.reply,proposal:result.proposal}]);setDraft('');
-      if(result.validation_error)setError(`La IA respondió, pero su propuesta no se puede aplicar: ${result.validation_error}`);
+      setTurns([...turns,{role:'user',content:input.message},{role:'assistant',content:result.reply,proposal:result.proposal,validation_error:result.validation_error}]);setDraft('');
       if(result.proposal)setProposal(structuredClone(result.proposal));
     }catch(e){setError(message(e));}finally{setPending('');setBusy(false);}
   }
@@ -50,7 +50,7 @@ export function FreeAIChat({backend,context,initialTask,caseId,run,onBusy}:{back
         h('div',{className:'free-chat-starters'},...['Resume la información disponible.','¿Qué información falta por aclarar?','Prepara una propuesta para la tarea seleccionada.'].map(text=>h(Button,{key:text,variant:'secondary',disabled:busy||!prepared,onClick:()=>setDraft(text)},text)))),
       ...turns.map((turn,i)=>h('article',{key:i,className:`free-chat-bubble ${turn.role}`},h('strong',null,turn.role==='user'?'Tú':'Asistente Camposol'),h('p',null,turn.content),turn.proposal&&h(Button,{variant:'secondary',disabled:busy,onClick:()=>{setProposal(structuredClone(turn.proposal!));setReviewed(false);setError('');}},'Revisar esta propuesta'))),
       pending&&h('article',{className:'free-chat-bubble user'},h('strong',null,'Tú'),h('p',null,pending)),pending&&h('p',{role:'status',className:'free-chat-thinking'},'El asistente está preparando la respuesta…'),h('div',{ref:bottom})),
-    h(Alert,{message:error}),h(Alert,{message:success,success:true}),
+    h(Alert,{message:error}),h(FreeChatProposalIssue,{error:validationIssue,busy,onRepair:()=>{setDraft(CHAT_REPAIR_MESSAGE);setError('');}}),h(Alert,{message:success,success:true}),
     prepared&&h('form',{className:'free-chat-composer',onSubmit:send},h(QAField,{label:'Tu mensaje',value:draft,onChange:setDraft,rows:3,maxLength:CHAT_MESSAGE_LIMIT,readOnly:busy,hint:'La conversación es temporal. Las propuestas que apliques sí se guardan en la cartilla y su historial.'}),
       h('label',{className:'checkbox ai-consent'},h('input',{type:'checkbox',checked:consent,disabled:busy,onChange:(e:ChangeEvent<HTMLInputElement>)=>setConsent(e.target.checked)}),' Revisé el contexto y cuento con autorización para compartirlo, junto con los mensajes que envíe, con Groq durante esta conversación.'),
       h('div',{className:'form-actions'},h(Button,{variant:'ghost',disabled:busy,onClick:clearConversation},'Nueva conversación'),h(Button,{type:'submit',disabled:busy||service.loading||!service.status?.enabled||!consent||!draft.trim()},busy?'Consultando…':'Enviar mensaje'))),
