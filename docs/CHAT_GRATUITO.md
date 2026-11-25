@@ -18,6 +18,8 @@ Backend actualizado en el proyecto existente: `qa-ai` versión **6**, ACTIVE, `v
 
 La conexión al navegador local no estuvo disponible en esta continuación. No se recargó la pestaña del usuario ni se reenviaron sus requisitos. La prueba con transporte simulado no se presenta como una generación nueva de Groq. Tras publicarse, la siguiente consulta autorizada desde la página comprobará la respuesta real del proveedor con el nuevo contrato. La conversación es temporal; guardar las ediciones de la cartilla antes de recargar.
 
+Publicación comprobada: código [`010c19ce9b3cdeb8972fb2e3f6db65e2e007d38b`](https://github.com/brancoretto24102-ui/camposol-qa/commit/010c19ce9b3cdeb8972fb2e3f6db65e2e007d38b), [verificación 45700291179](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45700291179) y [Pages 45700291229](https://github.com/brancoretto24102-ui/camposol-qa/actions/runs/45700291229), ambas `completed/success`. La URL pública y `index-RA4ElSjC.js` devolvieron HTTP 200; el recurso servido contiene **Preparar corrección** y el historial con `validation_error`.
+
 Referencias primarias: [Groq — Structured Outputs](https://console.groq.com/docs/structured-outputs). El historial de verificación y activación que sigue corresponde a la implementación inicial.
 
 ## Funcionamiento
